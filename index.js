@@ -5,6 +5,8 @@ import { config } from 'dotenv'
 import { promises as fs } from 'fs';
 import { Configuration, OpenAIApi } from 'openai'
 
+import Redis from './redis.js'
+
 config()
 
 const configuration = new Configuration({
@@ -17,15 +19,15 @@ async function askOpenAI(prompt, user){
     const response = await openai.createCompletion({
         model: "text-davinci-003",
         prompt: prompt,
-        temperature: 0.7,
+        temperature: 0.9,
+        max_tokens: 100,
         top_p: 1,
-        max_tokens: 100, 
         frequency_penalty: 0,
-        presence_penalty: 0,
+        presence_penalty: 0.6,
         user: user,
-        stop: ["{}"]
-      });
-    return response.data.choices[0].text.replace(/(\r\n|\n|\r)/gm, "")
+        stop: [" User:", " AI:"],
+    });
+    return response.data.choices[0].text
 }
 
 
@@ -46,27 +48,52 @@ async function main() {
     await chatClient.connect();
 
     chatClient.onMessage(async (channel, user, text, msg) => {
-        const atSelf = new RegExp(/^@Pieront/g)
-        if(atSelf.test(text)){
-            const response = await askOpenAI(text, user)
-            chatClient.say(channel, `${user} ${response}`)
-        }
-        if(text.startsWith('!!')){
-            if(text === '!!vod'){
-                const channel_id = (await helixApi.users.getUserByName(channel.slice(1))).id
-                const lastVOD = (await helixApi.videos.getVideosByUser(channel_id,{ limit: 1, type: 'archive'})).data[0].url
-                if(channel === '#kalathraslolweapon'){
-                    chatClient.say(channel, `!hug ${lastVOD}`)
-                }else{
-                    chatClient.say(channel, `${user}, UTLIMO VOD: ${lastVOD}`)
-                }
+        if(text.startsWith('!!callate ') && user === 'piero_fn'){
+            const timeOut = text.split(' ')[1]
+            const isNumber = !isNaN(timeOut)
+            if(isNumber && parseInt(timeOut) >= 1){
+                chatClient.say(channel, 'vale :/, ' + timeOut)
+                await Redis.setEx('CALLADO:'+channel, parseInt(timeOut) * 60, 'callado')
+            }else{
+                chatClient.say(channel, 'escribi Bien OOOO')
             }
         }
-        const botRe = new RegExp(/piero/g)
-        if(botRe.test(text) && !(user == chatClient.currentNick)){
-            const emotes = JSON.parse(await fs.readFile('./json/emotes.json', 'UTF-8'))
-            const random = Math.floor(Math.random() * emotes.length);
-            chatClient.say(channel, emotes[random], { replyTo: msg })
+        const estaCallado = await Redis.get('CALLADO:'+channel)
+        if(estaCallado !== 'callado' || estaCallado === null){
+            const atSelf = new RegExp(/^@Pieront /g)
+            if(atSelf.test(text)){
+                const firstPrompt = `\nUser: Hola soy ${user}, Quien eres?\nAI: Hola ${user}, Yo soy un bot en twitch creado por Piero y estoy conversando en el canal de ${channel.slice(1)}.`
+                const bodyPrompt = await Redis.get(`BOT:${channel}:${user}`)
+                const userPrompt = `\nUser: ${text.slice(9)}`
+                let currentPrompt = ''
+                if(bodyPrompt === null){
+                    await Redis.set(`BOT:${channel}:${user}`, firstPrompt + userPrompt)
+                    currentPrompt = firstPrompt + userPrompt
+                }else{
+                    currentPrompt = bodyPrompt + userPrompt
+                }
+                const response = await askOpenAI(currentPrompt, user)
+                await Redis.set(`BOT:${channel}:${user}`, currentPrompt+response)
+                const cleanResponse = response.slice(response.indexOf('AI: ')+4)
+                chatClient.say(channel, user+' '+cleanResponse)
+            }
+            if(text.startsWith('!!')){
+                if(text === '!!vod'){
+                    const channel_id = (await helixApi.users.getUserByName(channel.slice(1))).id
+                    const lastVOD = (await helixApi.videos.getVideosByUser(channel_id,{ limit: 1, type: 'archive'})).data[0].url
+                    if(channel === '#kalathraslolweapon'){
+                        chatClient.say(channel, `!hug ${lastVOD}`)
+                    }else{
+                        chatClient.say(channel, `${user}, UTLIMO VOD: ${lastVOD}`)
+                    }
+                }
+            }
+            const botRe = new RegExp(/piero/g)
+            if(botRe.test(text) && !(user == chatClient.currentNick)){
+                const emotes = JSON.parse(await fs.readFile('./json/emotes.json', 'UTF-8'))
+                const random = Math.floor(Math.random() * emotes.length);
+                chatClient.say(channel, emotes[random])
+            }
         }
     });
 
