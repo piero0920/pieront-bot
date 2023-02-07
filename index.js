@@ -27,7 +27,12 @@ async function askOpenAI(prompt, user){
         user: user,
         stop: [" User:", " AI:"],
     });
-    return response.data.choices[0].text
+    try{
+        return response.data.choices[0].text
+    } catch(e) {
+        console.log(e)
+        return ''
+    }
 }
 
 
@@ -51,10 +56,16 @@ async function main() {
         if(text.startsWith('!!callate ') && user === 'piero_fn'){
             const timeOut = text.split(' ')[1]
             const isNumber = !isNaN(timeOut)
-            if(isNumber && parseInt(timeOut) >= 1){
+            if(text.split(' ')[2] !== undefined && isNumber && parseInt(timeOut) >= 1){
+                const channels = JSON.parse(await fs.readFile('./json/channels.json', 'UTF-8')) 
+                chatClient.say(channel, 'vale :/, bye por' + timeOut + 's.')
+                for(const c of channels){
+                    await Redis.setEx('CALLADO:'+c, parseInt(timeOut) * 60, 'callado')
+                }
+            }else if(isNumber && parseInt(timeOut) >= 1){
                 chatClient.say(channel, 'vale :/, ' + timeOut)
                 await Redis.setEx('CALLADO:'+channel, parseInt(timeOut) * 60, 'callado')
-            }else{
+            } else{
                 chatClient.say(channel, 'escribi Bien OOOO')
             }
         }
@@ -73,9 +84,13 @@ async function main() {
                     currentPrompt = bodyPrompt + userPrompt
                 }
                 const response = await askOpenAI(currentPrompt, user)
-                await Redis.set(`BOT:${channel}:${user}`, currentPrompt+response)
-                const cleanResponse = response.slice(response.indexOf('AI: ')+4)
-                chatClient.say(channel, user+' '+cleanResponse)
+                if(response.length){
+                    await Redis.set(`BOT:${channel}:${user}`, currentPrompt+response)
+                    const cleanResponse = response.slice(response.indexOf('AI: ')+4)
+                    chatClient.say(channel, user+' '+cleanResponse)
+                }else{
+                    chatClient.say(channel, user+' escribi Bien OOOO')
+                }
             }
             if(text.startsWith('!!')){
                 if(text === '!!vod'){
@@ -93,6 +108,12 @@ async function main() {
                 const emotes = JSON.parse(await fs.readFile('./json/emotes.json', 'UTF-8'))
                 const random = Math.floor(Math.random() * emotes.length);
                 chatClient.say(channel, emotes[random])
+            }
+        }else{
+            const atSelf = new RegExp(/^@Pieront /g)
+            if(atSelf.test(text)){
+                const exp = await Redis.TTL('CALLADO:'+channel)
+                chatClient.say(channel, `toy callado :/ por ${exp} s`)
             }
         }
     });
