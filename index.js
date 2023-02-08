@@ -100,8 +100,9 @@ async function main() {
                             await Redis.setEx(`BOT:${channel}:${user}`, parseInt(userTTL) ,currentPrompt+response)
                             const cleanResponse = response.slice(response.indexOf('AI: ')+4)
                             chatClient.say(channel, user+' '+cleanResponse)
-                            if(response.length > 5000){
+                            if((currentPrompt+response).length > 5000){
                                 await Redis.del(`BOT:${channel}:${user}`)
+                                chatClient.say(channel, user+' historial limpiado.')
                             }
                         }else{
                             chatClient.say(channel, user+' escribi Bien OOOO')
