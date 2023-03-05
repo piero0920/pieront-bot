@@ -166,11 +166,8 @@ async function main() {
 
                             const cleanResponse = response.msg.content.trim()
                             chatClient.say(channel, user+' '+cleanResponse)
+                            console.log(response.tokens, currentMsg.length)
                             if(currentMsg.length > promptLen){
-                                await Redis.del(`BOT:${channel}:${user}`)
-                                chatClient.say(channel, user+' historial limpiado.')
-                            }
-                            if(response.tokens > promptLen){
                                 await Redis.del(`BOT:${channel}:${user}`)
                                 chatClient.say(channel, user+' historial limpiado.')
                             }
