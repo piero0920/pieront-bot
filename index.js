@@ -170,6 +170,10 @@ async function main() {
                                 await Redis.del(`BOT:${channel}:${user}`)
                                 chatClient.say(channel, user+' historial limpiado.')
                             }
+                            if(response.tokens > promptLen){
+                                await Redis.del(`BOT:${channel}:${user}`)
+                                chatClient.say(channel, user+' historial limpiado.')
+                            }
                         }
                     }else{
                         chatClient.say(channel, user+' para el spam MYAAA')
