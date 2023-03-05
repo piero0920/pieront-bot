@@ -34,6 +34,31 @@ async function askOpenAI(prompt, user){
     
 }
 
+async function chatOpenAI(msg, user){
+    const response = await openai.createChatCompletion({
+        model: "gpt-3.5-turbo",
+        messages: msg,
+        temperature: 0.9,
+        top_p: 1,
+        max_tokens: 100,
+        frequency_penalty: 0,
+        presence_penalty: 0.6,
+        user: user,
+    })
+    try {
+        return {
+            tokens: response.data.usage.total_tokens,
+            msg: response.data.choices[0].message
+        }
+    }catch(e) {
+        console.log(e.message)
+        console.log(response.data)
+        return {
+            tokens: 0,
+            msg: ''
+        }
+    }
+}
 
 async function main() {
 
@@ -51,11 +76,13 @@ async function main() {
     
     await chatClient.connect();
     
-    const promptLen = 3000
+    const promptLen = 100 // conversation len
     const promptTTL = 5 //hours
     const coolDown = [{}]
+    const emotes = [{}]
     for(const c of JSON.parse(await fs.readFile('./json/channels.json', 'UTF-8'))){
-        coolDown[0][c]= []
+        coolDown[0][c] = []
+        emotes[0][c] = []
     }
 
     chatClient.onMessage(async (channel, user, text, msg) => {
@@ -78,6 +105,18 @@ async function main() {
                 return
             }
         }
+        const cacheEmotes = await Redis.get('CHATBOT:EMOTES:'+channel)
+        if(cacheEmotes == null){
+            const channel_id = await helixApi.users.getUserByName(channel.slice(1))
+            const channel_emotes = await helixApi.chat.getChannelEmotes(channel_id.id)
+            for(const emote of channel_emotes){
+                if(emote.tier && emote.tier.toString().startsWith("1")){
+                    emotes[0][channel.slice(1)] += emote.name + ' '
+                }
+            }
+            await Redis.setEx('CHATBOT:EMOTES'+ channel, 60 * 60 * promptTTL, emotes[0][channel.slice(1)])
+        }
+        
         const estaCallado = await Redis.get('CALLADO:'+channel)
         if(estaCallado !== 'callado' || estaCallado === null){
             const atSelf = new RegExp(/^@Pieront /g)
@@ -88,28 +127,46 @@ async function main() {
                         chatClient.say(channel, user + 'tu historial se ha borrado y te he olvidado.')
                         return
                     }
+                    const firstMsg = {
+                        role: "system",
+                        content: `Eres un chatbot llamado Pieront, que se encuentra en el canal de ${channel.slice(1)} en twitch, ayudaras como puedas respondiendo todo, tu creador es piero.`
+                    }
+                
                     const firstPrompt = `\nUser: Hola soy ${user}, Quien eres?\nAI: Hola ${user}, Yo soy un bot creado por Piero y estoy conversando en el canal de ${channel.slice(1)} en twitch.\nUser: Cual es tu nombre o como me puedo referirte a ti?\nAI: Yo soy Pieront, asi puedes referirte a mi.\nUser: Quien es Piero?\nAI: El es un simple viewer de ${channel}, y en sus ratos libre programa.\nUser: Por que estas en el canal de ${channel}?\nAI: Estoy aqui para disfrutar el contenido del Streamer ${channel}.\nUser: Puedes interactuar en el canal de ${channel}?\nAI: Lamentablemente no puedo interactuar en el canal, solo estoy aqui para reacionar y responder.\nUser: Tengo un historial de esta conversacion?\nAI: Si, tu historial de esta conversacion se guarda y se borra cada ${promptTTL} horas o si los caracters supera los ${promptLen}.\nUser: Puedo tenerlo, mi historial?\nAI: Tu historail se encuentra aqui https://api.kala-vods.com/v1/logs/${channel.slice(1)}/${user}.\nUser: Puedo ver tu codigo, como estas creado?\nAI: Mi codigo es open source y se puede encontrar en https://github.com/piero0920/pieront-bot.`
                     const bodyPrompt = await Redis.get(`BOT:${channel}:${user}`)
+                    const fullMsg = await Redis.get(`BOT:${channel}:${user}`)
                     const userPrompt = `\nUser: ${text.slice(9)}`
+                    const userMsg = {
+                        role: "user",
+                        content: text.slice(9)
+                    }
                     let isRepeated = false
                     let currentPrompt = ''
-                    if(bodyPrompt === null){
-                        await Redis.setEx(`BOT:${channel}:${user}`, 60 * 60 * promptTTL, firstPrompt + userPrompt)
-                        currentPrompt = firstPrompt + userPrompt
+                    let currentMsg = []
+                    if(fullMsg == null){
+                        const cacheEmotes = await Redis.get('CHATBOT:EMOTES' + channel)
+                        const emoteMsg = {
+                            role: "system",
+                            content: "Agrega estos emotes del canal a algunas de tus respuestas, " + cacheEmotes
+                        }
+                        currentMsg.push(firstMsg, emoteMsg, userMsg)
+                        await Redis.setEx(`BOT:${channel}:${user}`, 60 * 60 * promptTTL, JSON.stringify(currentMsg))
                     }else{
-                        if(bodyPrompt.split('\n').at(-2) === userPrompt.trim()){
+                        if(JSON.parse(fullMsg).at(-2) == userMsg){
                             isRepeated = true
                         }
-                        currentPrompt = bodyPrompt + userPrompt
+                        currentMsg.push(...JSON.parse(fullMsg), userMsg)
                     }
                     if(!isRepeated){
-                        const response = await askOpenAI(currentPrompt, user)
-                        if(response.length){
+                        const response = await chatOpenAI(currentMsg, user)
+                        if(response.msg){
+                            currentMsg.push(response.msg)
                             const userTTL = await Redis.TTL(`BOT:${channel}:${user}`)
-                            await Redis.setEx(`BOT:${channel}:${user}`, parseInt(userTTL) ,currentPrompt+response)
-                            const cleanResponse = response.slice(response.indexOf('AI: ')+4)
+                            await Redis.setEx(`BOT:${channel}:${user}`, parseInt(userTTL), JSON.stringify(currentMsg))
+
+                            const cleanResponse = response.msg.content.trim()
                             chatClient.say(channel, user+' '+cleanResponse)
-                            if((currentPrompt+response).length > promptLen){
+                            if(currentMsg.length > promptLen){
                                 await Redis.del(`BOT:${channel}:${user}`)
                                 chatClient.say(channel, user+' historial limpiado.')
                             }
@@ -143,7 +200,7 @@ async function main() {
                         const ttlTime = new Date(ttl * 1000).toISOString().slice(11, 19)
                         if(ttl > 1){
                             const prompt = await Redis.get(`BOT:${channel}:${user}`)
-                            chatClient.say(channel, `${user} ttl: ${ttlTime}, len: ${prompt.length}/${promptLen}.`)
+                            chatClient.say(channel, `${user} ttl: ${ttlTime}, len: ${JSON.parse(prompt).length}/${promptLen}.`)
                         }else {
                             chatClient.say(channel, `${user} no pude encontrar tu TTL`)
                         }
@@ -152,7 +209,7 @@ async function main() {
                         const ttlTime = new Date(ttl * 1000).toISOString().slice(11, 19)
                         if(ttl > 1){
                             const prompt = await Redis.get(`BOT:${channel}:${cmd[1].slice(1)}`)
-                            chatClient.say(channel, `${user} ttl: ${ttlTime}, len: ${prompt.length}/${promptLen}.`)
+                            chatClient.say(channel, `${user} ttl: ${ttlTime}, len: ${JSON.parse(prompt).length}/${promptLen}.`)
                         }else {
                             chatClient.say(channel, `${user} no pude encontrar el TTL de ${cmd[1].slice(1)}`)
                         }
