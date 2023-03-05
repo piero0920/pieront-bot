@@ -77,6 +77,7 @@ async function main() {
     await chatClient.connect();
     
     const promptLen = 100 // conversation len
+    const tokenLen = 2500 // total token usage
     const promptTTL = 5 //hours
     const coolDown = [{}]
     const emotes = [{}]
@@ -166,8 +167,11 @@ async function main() {
 
                             const cleanResponse = response.msg.content.trim()
                             chatClient.say(channel, user+' '+cleanResponse)
-                            console.log(response.tokens, currentMsg.length)
                             if(currentMsg.length > promptLen){
+                                await Redis.del(`BOT:${channel}:${user}`)
+                                chatClient.say(channel, user+' historial limpiado.')
+                            }
+                            if(response.tokens > tokenLen){
                                 await Redis.del(`BOT:${channel}:${user}`)
                                 chatClient.say(channel, user+' historial limpiado.')
                             }
