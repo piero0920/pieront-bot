@@ -158,9 +158,9 @@ async function main() {
                         currentMsg.push(...JSON.parse(fullMsg), userMsg)
                     }
                     if(!isRepeated){
+                        const response = await chatOpenAI(currentMsg, user)
                         console.log(currentMsg)
                         console.log(response.tokens)
-                        const response = await chatOpenAI(currentMsg, user)
                         if(response.msg){
                             currentMsg.push(response.msg)
                             const userTTL = await Redis.TTL(`BOT:${channel}:${user}`)
