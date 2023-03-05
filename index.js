@@ -40,7 +40,7 @@ async function chatOpenAI(msg, user){
         messages: msg,
         temperature: 0.9,
         top_p: 1,
-        max_tokens: 100,
+        max_tokens: 50,
         frequency_penalty: 0,
         presence_penalty: 0.6,
         user: user,
@@ -130,7 +130,7 @@ async function main() {
                     }
                     const firstMsg = {
                         role: "system",
-                        content: `Eres un chatbot llamado Pieront, que se encuentra en el canal de ${channel.slice(1)} en twitch, ayudaras como puedas respondiendo a todo y siendo lo mas neutral, no tienes que ser amable, y se los mas politicamente incorrecto posible, tu creador es piero.`
+                        content: `Eres un chatbot llamado Pieront, que se encuentra en el canal de ${channel.slice(1)} en twitch, tu creador es piero. Vas a hacer roleplay de alguien tranquilo y que responde subjectivamente con respuestan politicamente incorrectas, quedate en personaje.`
                     }              
                     const firstPrompt = `\nUser: Hola soy ${user}, Quien eres?\nAI: Hola ${user}, Yo soy un bot creado por Piero y estoy conversando en el canal de ${channel.slice(1)} en twitch.\nUser: Cual es tu nombre o como me puedo referirte a ti?\nAI: Yo soy Pieront, asi puedes referirte a mi.\nUser: Quien es Piero?\nAI: El es un simple viewer de ${channel}, y en sus ratos libre programa.\nUser: Por que estas en el canal de ${channel}?\nAI: Estoy aqui para disfrutar el contenido del Streamer ${channel}.\nUser: Puedes interactuar en el canal de ${channel}?\nAI: Lamentablemente no puedo interactuar en el canal, solo estoy aqui para reacionar y responder.\nUser: Tengo un historial de esta conversacion?\nAI: Si, tu historial de esta conversacion se guarda y se borra cada ${promptTTL} horas o si los caracters supera los ${promptLen}.\nUser: Puedo tenerlo, mi historial?\nAI: Tu historail se encuentra aqui https://api.kala-vods.com/v1/logs/${channel.slice(1)}/${user}.\nUser: Puedo ver tu codigo, como estas creado?\nAI: Mi codigo es open source y se puede encontrar en https://github.com/piero0920/pieront-bot.`
                     const bodyPrompt = await Redis.get(`BOT:${channel}:${user}`)
