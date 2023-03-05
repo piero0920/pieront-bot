@@ -158,6 +158,8 @@ async function main() {
                         currentMsg.push(...JSON.parse(fullMsg), userMsg)
                     }
                     if(!isRepeated){
+                        console.log(currentMsg)
+                        console.log(response.tokens)
                         const response = await chatOpenAI(currentMsg, user)
                         if(response.msg){
                             currentMsg.push(response.msg)
@@ -167,10 +169,6 @@ async function main() {
                             const cleanResponse = response.msg.content.trim()
                             chatClient.say(channel, user+' '+cleanResponse)
                             if(currentMsg.length > promptLen){
-                                await Redis.del(`BOT:${channel}:${user}`)
-                                chatClient.say(channel, user+' historial limpiado.')
-                            }
-                            if(response.tokens > tokenLen){
                                 await Redis.del(`BOT:${channel}:${user}`)
                                 chatClient.say(channel, user+' historial limpiado.')
                             }
