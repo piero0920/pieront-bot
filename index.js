@@ -50,9 +50,8 @@ async function chatOpenAI(msg, user){
             tokens: response.data.usage.total_tokens,
             msg: response.data.choices[0].message
         }
-    }catch(e) {
-        console.log(e.message)
-        console.log(response.data)
+    }catch {
+        console.log(response.data.error)
         return {
             tokens: 0,
             msg: ''
@@ -149,7 +148,7 @@ async function main() {
                             role: "system",
                             content: "Agrega estos emotes del canal a algunas de tus respuestas, " + cacheEmotes
                         }
-                        currentMsg.push(firstMsg, emoteMsg, userMsg)
+                        currentMsg.push(firstMsg, userMsg)
                         await Redis.setEx(`BOT:${channel}:${user}`, 60 * 60 * promptTTL, JSON.stringify(currentMsg))
                     }else{
                         if(JSON.parse(fullMsg).at(-2) == userMsg){
