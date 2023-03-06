@@ -127,10 +127,16 @@ async function main() {
                         chatClient.say(channel, user + 'tu historial se ha borrado y te he olvidado.')
                         return
                     }
-                    const firstMsg = {
-                        role: "system",
-                        content: `Eres un chatbot llamado Pieront, que se encuentra en el canal de ${channel.slice(1)} en twitch, tu creador es piero. Vas a hacer roleplay de alguien tranquilo y que responde subjectivamente con respuestan politicamente incorrectas, quedate en personaje.`
-                    }              
+                    const firstMsg = [
+                        {
+                            role: "system",
+                            content: `Eres un chatbot llamado Pieront, que se encuentra en el canal de ${channel.slice(1)} en twitch, tu creador es piero.`
+                        },
+                        {
+                            role: "system",
+                            content: 'Assistant respond in 10 words or less, respond with dark answers, subjectively and edgy, stay in character.'
+                        }
+                    ]              
                     const firstPrompt = `\nUser: Hola soy ${user}, Quien eres?\nAI: Hola ${user}, Yo soy un bot creado por Piero y estoy conversando en el canal de ${channel.slice(1)} en twitch.\nUser: Cual es tu nombre o como me puedo referirte a ti?\nAI: Yo soy Pieront, asi puedes referirte a mi.\nUser: Quien es Piero?\nAI: El es un simple viewer de ${channel}, y en sus ratos libre programa.\nUser: Por que estas en el canal de ${channel}?\nAI: Estoy aqui para disfrutar el contenido del Streamer ${channel}.\nUser: Puedes interactuar en el canal de ${channel}?\nAI: Lamentablemente no puedo interactuar en el canal, solo estoy aqui para reacionar y responder.\nUser: Tengo un historial de esta conversacion?\nAI: Si, tu historial de esta conversacion se guarda y se borra cada ${promptTTL} horas o si los caracters supera los ${promptLen}.\nUser: Puedo tenerlo, mi historial?\nAI: Tu historail se encuentra aqui https://api.kala-vods.com/v1/logs/${channel.slice(1)}/${user}.\nUser: Puedo ver tu codigo, como estas creado?\nAI: Mi codigo es open source y se puede encontrar en https://github.com/piero0920/pieront-bot.`
                     const bodyPrompt = await Redis.get(`BOT:${channel}:${user}`)
                     const fullMsg = await Redis.get(`BOT:${channel}:${user}`)
@@ -148,7 +154,7 @@ async function main() {
                             role: "system",
                             content: "Agrega estos emotes del canal a algunas de tus respuestas, " + cacheEmotes
                         }
-                        currentMsg.push(firstMsg, userMsg)
+                        currentMsg.push(...firstMsg, userMsg)
                         await Redis.setEx(`BOT:${channel}:${user}`, 60 * 60 * promptTTL, JSON.stringify(currentMsg))
                     }else{
                         if(JSON.parse(fullMsg).at(-2) == userMsg){
@@ -158,10 +164,17 @@ async function main() {
                     }
                     if(!isRepeated){
                         const response = await chatOpenAI(currentMsg, user)
-                        console.log(currentMsg)
-                        console.log(response.tokens)
                         if(response.msg){
                             currentMsg.push(response.msg)
+                            if(currentMsg.length % 8 == 0 || currentMsg.length + 1 % 8 == 0 || currentMsg.length - 1 % 8 == 0){
+                                const reminder = {
+                                    role: "system",
+                                    content: "Remenber stay in character."
+                                }
+                                currentMsg.push(reminder)
+                            }
+                            console.log(currentMsg)
+                            console.log(response.tokens)
                             const userTTL = await Redis.TTL(`BOT:${channel}:${user}`)
                             await Redis.setEx(`BOT:${channel}:${user}`, parseInt(userTTL), JSON.stringify(currentMsg))
 
