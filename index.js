@@ -166,7 +166,9 @@ async function main() {
                         const response = await chatOpenAI(currentMsg, user)
                         if(response.msg){
                             currentMsg.push(response.msg)
-                            if(currentMsg.length % 8 == 0 || currentMsg.length + 1 % 8 == 0 || currentMsg.length - 1 % 8 == 0){
+                            const filtered = currentMsg.filter(function(e) { return e.role != "system"; }); 
+                            if(filtered.length % 8 === 0 || filtered.length + 1 % 8 === 0 || filtered.length - 1 % 8 === 0){
+                                console.log('pushing reminder')
                                 const reminder = {
                                     role: "system",
                                     content: "Remenber stay in character."
@@ -175,6 +177,7 @@ async function main() {
                             }
                             console.log(currentMsg)
                             console.log(response.tokens)
+                            console.log(currentMsg.length, filtered.length)
                             const userTTL = await Redis.TTL(`BOT:${channel}:${user}`)
                             await Redis.setEx(`BOT:${channel}:${user}`, parseInt(userTTL), JSON.stringify(currentMsg))
 
