@@ -1,0 +1,12 @@
+{
+    "imports": {
+        "app/": "./",
+        "deps": "./deps.ts",
+        "interfaces": "./src/interfaces.ts"
+    },
+    "tasks": {
+        "start": "deno run --allow-read --allow-write --allow-net --allow-env main.ts",
+        "dev": "deno run --allow-all --watch main.ts",
+        "test": "deno run --allow-all --watch test.ts"
+    }
+}

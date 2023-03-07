@@ -1,0 +1,25 @@
+{
+    "historialLimit": 75,
+    "historialCleanInHours": 5,
+    "tokenLimit": 2500,
+    "cooldownTimeInSec": 20,
+    "globalPrompt": "Assistant respond in 10 words or less, respond with subjectively, datk and edgy answers, Remenber stay in character.",
+    "globalEmotes": [""],
+    "channels": [
+        {
+            "channel": "piero_fn",
+            "description": "",
+            "customPrompt": ""
+        },
+        {
+            "channel": "endnatsu",
+            "description": "",
+            "customPrompt": ""
+        },
+        {
+            "channel": "kalathraslolweapon",
+            "description": "",
+            "customPrompt": ""
+        }
+    ]
+}
