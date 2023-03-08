@@ -1,7 +1,9 @@
 import { startDB } from 'app/src/database.ts';
-import { load_bot_settings, load_channel_settings, local_config } from 'app/src/config.ts';
+import { load_bot_settings, load_channel_settings, local_config, validate_settings } from 'app/src/config.ts';
 import chat, { listenChannel } from 'app/src/tmi.ts'
 import { runCronjobs } from 'app/src/cronjobs.ts'
+
+validate_settings()
 
 await startDB()
 

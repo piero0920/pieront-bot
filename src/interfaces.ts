@@ -7,6 +7,7 @@ export interface botDatabase {
     expires_in_date     : number;
     global_emotes       : string[];
     global_prompt       : string;
+    globalMessageModel  : ChatCompletionResponseMessage[]
     historial_limit     : number;
     historial_clean_in  : number;
     token_limit         : number;
@@ -41,10 +42,11 @@ export interface channelLocalConfig {
 }
 
 export interface localConfig {
-    channels            : channelLocalConfig[],
-    globalEmotes        : string[],
+    channels            : channelLocalConfig[];
+    globalEmotes        : string[];
     globalPrompt        : string;
-    historialLimit      :number;
+    globalMessageModel  : ChatCompletionResponseMessage[];
+    historialLimit      : number;
     historialCleanInHours: number;
     tokenLimit          : number;
     cooldownTimeInSec   : number;
@@ -61,7 +63,8 @@ export interface TwitchUserResponse {
 }
 
 export interface cooldown {
-    user_id             :string;
+    user_id             : string;
+    user_name           : string;
     cooldown_time       : number;
 }
 
@@ -143,6 +146,13 @@ export interface ztvEmote {
 }
 
 export interface chatOpenAIResponse {
-    tokens      : number | undefined;
-    msg         : ChatCompletionResponseMessage | undefined;
+    success             : boolean;
+    status_text         : string;
+    tokens              : number | undefined;
+    msg                 : ChatCompletionResponseMessage | undefined;
+}
+
+export interface validateToken {
+    client_id           : string;
+    expires_in          : number;
 }

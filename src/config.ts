@@ -2,7 +2,7 @@ import "https://deno.land/std@0.177.0/dotenv/load.ts"
 import db, { saveToDB } from "app/src/database.ts";
 import { get_auth_token, get_user, get_vods, is_channel_live, get_twitch_emotes, get_bttv_emotes, get_7tv_emotes } from 'app/src/api.ts'
 import { botDatabase, localConfig, channelDatabase } from "interfaces";
-import { datetime } from 'deps'
+import { datetime, ChatCompletionResponseMessage } from 'deps'
 
 const local_config_data = await Deno.readTextFile('config.json')
 export const local_config:localConfig = JSON.parse(local_config_data)
@@ -17,47 +17,84 @@ const config = {
     API_KEY: <string>Deno.env.get("OPENAI_API_KEY")
 }
 
-if(Object.values(config).some(e=> e === undefined)){
-    let Missing!: string;
-    Object.keys(config).some(e=>{
-        if(config[e as keyof typeof config] === undefined){
-            Missing = e
+export function validate_settings(){
+    console.log('Validating settings')
+    if(Object.values(config).some(e=> e === undefined)){
+        let Missing!: string;
+        Object.keys(config).some(e=>{
+            if(config[e as keyof typeof config] === undefined){
+                Missing = e
+            }
+        })
+        throw 'Missing environment variable:' + Missing
+    }
+    
+    let is_assistant = true
+    let is_user = true
+    let content_empty = false
+
+    for(let i = 0; i < local_config.globalMessageModel.length; i++){
+        if(i & 1){
+            if(local_config.globalMessageModel[i].role !== "assistant"){
+                is_assistant = false
+            }
+        }else {
+            if(local_config.globalMessageModel[i].role !== "user"){
+                is_user = false
+            }
         }
-    })
-    throw 'Missing environment variable:' + Missing
+        if(local_config.globalMessageModel[i].content === "" || local_config.globalMessageModel[i].content === undefined){
+            content_empty = true
+        }
+    }
+    if(!(is_assistant && is_user && !content_empty)){
+        throw 'check if global message model is in a correct order and its not empty in the config file'
+    }
+}
+
+function cleanGlobalMessageModel(){
+    const cleanModel:ChatCompletionResponseMessage[] = []
+    for(let i = 0; i < local_config.globalMessageModel.length; i++){
+        if(i === 5){
+            break
+        }
+        cleanModel.push(local_config.globalMessageModel[i])
+    }
+    return cleanModel
 }
 
 export async function load_bot_settings(){
-    const bot_exits = db.bot_db.contains("bot")
-    if(!bot_exits){
-        const token = await get_auth_token()
-        const expires_in_date = datetime().add({second: token.expires_in }).toMilliseconds()
-        const bot_doc:botDatabase = {
-            bot_channel_id: "0",
-            bot_channel_name: config.TWITCH_BOT_USERNAME,
-            access_token: token.access_token,
-            expires_in_date: expires_in_date,
-            global_emotes: local_config.globalEmotes,
-            global_prompt: local_config.globalPrompt,
-            historial_limit: local_config.historialLimit,
-            historial_clean_in: local_config.historialCleanInHours,
-            token_limit: local_config.tokenLimit,
-            cooldown_time: local_config.cooldownTimeInSec
-        }
-        await saveToDB(db.bot_db,'bot', bot_doc)
-
-        const bot = db.bot_db.get('bot')
-        
-        const user = await get_user(bot.bot_channel_name)
-
-        bot.bot_channel_id = user.id
-
-        await saveToDB(db.bot_db,'bot', bot)
+    console.log('Loading bot settings')
+    const token = await get_auth_token()
+    const expires_in_date = datetime().add({second: token.expires_in }).toMilliseconds()
+    const bot_doc:botDatabase = {
+        bot_channel_id: "0",
+        bot_channel_name: config.TWITCH_BOT_USERNAME,
+        access_token: token.access_token,
+        expires_in_date: expires_in_date,
+        global_emotes: local_config.globalEmotes,
+        global_prompt: local_config.globalPrompt,
+        globalMessageModel: cleanGlobalMessageModel(),
+        historial_limit: local_config.historialLimit,
+        historial_clean_in: local_config.historialCleanInHours,
+        token_limit: local_config.tokenLimit,
+        cooldown_time: local_config.cooldownTimeInSec
     }
+
+    await saveToDB(db.bot_db,'bot', bot_doc)
+
+    const bot = db.bot_db.get('bot')
+    
+    const user = await get_user(bot.bot_channel_name)
+
+    bot.bot_channel_id = user.id
+
+    await saveToDB(db.bot_db,'bot', bot)
 }
 
 export async function load_channel_settings(){
     for(const channel of local_config.channels){
+        console.log('Loading channel settings for', channel.channel)
         const user = await get_user(channel.channel)
         const vods = await get_vods(user.id)
         const is_live = await is_channel_live(user.id)
@@ -79,11 +116,11 @@ export async function load_channel_settings(){
         }
         await saveToDB(db.channel_db, channel_doc.channel_name, channel_doc)
 
-        await load_emotes(channel_doc.channel_name)
+        await update_emotes(channel_doc.channel_name)
     }    
 }
 
-export async function load_emotes(channel: string){
+export async function update_emotes(channel: string){
     const channel_in_db = db.channel_db.get(channel)
     if(channel_in_db){
         channel_in_db.tv_emotes = []

@@ -1,15 +1,55 @@
 {
-    "historialLimit": 75,
+    "historialLimit": 50,
     "historialCleanInHours": 5,
     "tokenLimit": 2500,
     "cooldownTimeInSec": 20,
-    "globalPrompt": "Assistant respond in 10 words or less, respond with subjectively, datk and edgy answers, Remenber stay in character.",
-    "globalEmotes": [""],
+    "globalPrompt": "Assistant responde en 10 palabras o menos, responde con subjectivas, oscuras y edgy respuestas, Remenber stay in character.",
+    "globalMessageModel": [
+        {
+            "role": "user",
+            "content": "Hola!, Que haces?"
+        },
+        {
+            "role": "assistant",
+            "content": "Estoy de pana"
+        },
+        {
+            "role": "user",
+            "content": "Que deberia hacer?"
+        },
+        {
+            "role": "assistant",
+            "content": "Mira el stream y tira piedritas OOOO"
+        },
+        {
+            "role": "user",
+            "content": "Donde esta tu codigo?" 
+        },
+        {
+            "role": "assistant",
+            "content": "Mi codigo esta publico en github, github.com/piero0920/pieront-bot"
+        },
+        {
+            "role": "user",
+            "content": "Cual es tu estado?"
+        },
+        {
+            "role": "assistant",
+            "content": "Actualmente estoy en etapa de testeo."
+        }
+    ],
+    "globalEmotes": [
+        "Kappa", "FeelsBadMan", "FeelsGoodMan", "monkaS","D:", "FeelsAmazingMan", 
+        "peepoHappy", "peepoSad", "pierof1Hmmm", "endnatHI", "HypeMwah", "PogBones", 
+        "Jebasted", "CaitlynS", "GlitchCat", "TPFufun", "LUL", "SabaPing", "KonCha", 
+        "VoHiYo", "KomodoHype", "KappaClaus", "KappaRoss", "CoolCat", "KappaPride", 
+        "NotLikeThis","<3"
+    ],
     "channels": [
         {
             "channel": "piero_fn",
-            "description": "",
-            "customPrompt": ""
+            "description": "Este canal de twitch es de piero_fn, tu creador.",
+            "customPrompt": "Responde aleatoreamente."
         },
         {
             "channel": "endnatsu",
@@ -18,8 +58,8 @@
         },
         {
             "channel": "kalathraslolweapon",
-            "description": "",
-            "customPrompt": ""
+            "description": "Este canal de twitch es de KalathrasLolweapon, es tu streamer favorito, ",
+            "customPrompt": "Disfrutas hacer netorare y te gustan las lolis."
         }
     ]
 }

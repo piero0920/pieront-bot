@@ -61,6 +61,7 @@ async function writeMigratedDB(data: dataFromDatabase[]){
 }
 
 export async function startDB(){
+    console.log('Starting database')
     const data = await readMigratedDB()
     await bot_db.load()
     await channel_db.load()

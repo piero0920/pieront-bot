@@ -2,7 +2,7 @@ import config from 'app/src/config.ts'
 import { 
     accessToken, twitchApiError, botDatabase, TwitchUserResponse, 
     TwitchVideoResponse, TwitchStreamResponse, TwitchEmoteResponse,
-    bttvEmoteResponse, ztvEmote } from 'interfaces'
+    bttvEmoteResponse, ztvEmote, validateToken } from 'interfaces'
 import db, { saveToDB } from 'app/src/database.ts'
 import { datetime } from 'deps'
 
@@ -22,7 +22,29 @@ export async function get_auth_token(){
     }
 }
 
-async function update_bot_auth_token(bot: botDatabase){
+export async function validate_auth_token(){
+    const bot = db.bot_db.get('bot')
+    const url = new URL('https://id.twitch.tv/oauth2/validate')
+
+    const r = await fetch(url, {
+        headers: {
+            "Authorization": "OAuth " + bot.access_token
+        }
+    })
+    
+    if(r.ok){
+        const response:validateToken = await r.json()
+        return response
+    }else {
+        const error: twitchApiError = await r.json()
+        console.log(error.message)
+        return undefined
+    }
+
+    
+}
+
+export async function update_bot_auth_token(bot: botDatabase){
     const token = await get_auth_token()
     const token_expires_date = datetime().add({second: token.expires_in}).toMilliseconds()
     bot.access_token = token.access_token

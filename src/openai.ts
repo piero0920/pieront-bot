@@ -21,12 +21,16 @@ export async function chatOpenAI(msg:ChatCompletionRequestMessage[], user:string
     })
     try {
         const chatResponse: chatOpenAIResponse = {
-            tokens: response.data.usage?.completion_tokens,
+            success: true,
+            status_text: response.statusText,
+            tokens: response.data.usage?.total_tokens,
             msg: response.data.choices[0].message
         }
         return chatResponse
     }catch {
         const chatResponse: chatOpenAIResponse = {
+            success: false,
+            status_text: response.statusText,
             tokens: 0,
             msg: undefined
         }
