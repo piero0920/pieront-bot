@@ -20,7 +20,8 @@ export async function listenChannel(c: Channel) {
             console.log('Error getting channel Database')
             return
         }
-        const should_chat = await get_should_chat(ircmsg, channel_db)
+        // arregla esto MYAAA, pto suenio peepoRun
+        const should_chat = true //await get_should_chat(ircmsg, channel_db)
         
         const random1 = Math.floor(Math.random() * 100);
         const random2 = Math.floor(Math.random() * 100); 
