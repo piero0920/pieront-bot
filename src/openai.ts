@@ -15,7 +15,7 @@ export async function chatOpenAI(msg:ChatCompletionRequestMessage[], user:string
         messages: msg,
         temperature: 0.9,
         top_p: 1,
-        max_tokens: 50,
+        max_tokens: 75,
         frequency_penalty: 0,
         presence_penalty: 0.6,
         user: user,

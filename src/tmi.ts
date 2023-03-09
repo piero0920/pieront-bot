@@ -20,8 +20,8 @@ export async function listenChannel(c: Channel) {
             console.log('Error getting channel Database')
             return
         }
-        // arregla esto MYAAA, pto suenio peepoRun
-        const should_chat = true //await get_should_chat(ircmsg, channel_db)
+
+        const should_chat = await get_should_chat(ircmsg, channel_db)
         
         const random1 = Math.floor(Math.random() * 100);
         const random2 = Math.floor(Math.random() * 100); 
@@ -31,7 +31,10 @@ export async function listenChannel(c: Channel) {
                 if(ircmsg.message == '!ping'){
                     pong(c, ircmsg)
                 }
-                if(ircmsg.message == '!vod' && should_chat){
+                if(!should_chat){
+                    return
+                }
+                if(ircmsg.message == '!vod'){
                     last_vod(c, ircmsg, channel_db)
                 }
                 if(bot_regex.test(ircmsg.message)){
@@ -40,12 +43,14 @@ export async function listenChannel(c: Channel) {
                 if(mod_regex.test(ircmsg.message)){
                     random_emote(c,channel_db)
                 }
-                /*
                 if(random1 % random2 === 0){
                     random_emote(c, channel_db)
                     return
                 }
-                */
+                if(ircmsg.message == '!a'){
+                    random_emote(c, channel_db)
+                    return
+                }
         }
     }
 }

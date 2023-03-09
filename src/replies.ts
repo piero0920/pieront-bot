@@ -31,7 +31,7 @@ function build_first_msg(channel_db: channelDatabase){
     const first_msg:ChatCompletionResponseMessage[] = [
         {
             role: "system",
-            content: bot.global_prompt
+            content: `Eres ${bot.bot_channel_name} y ${bot.global_prompt}`
         }
     ]
     if(channel_db.local_config.description) {
@@ -114,6 +114,7 @@ async function update_user_msg(user_id: string, chat_response: chatOpenAIRespons
 }
 
 export async function chat_with_bot(c:Channel, ircmsg: IrcMessage, channel_db: channelDatabase){
+    console.log()
     const msg_id = get_msg_id(ircmsg, channel_db)
     const user = db.msg_db.contains(msg_id)
     
@@ -146,7 +147,6 @@ export async function chat_with_bot(c:Channel, ircmsg: IrcMessage, channel_db: c
         const send_msg = `${ircmsg.username} ${response.msg.content.trim()}`
         c.send(send_msg)
 
-        console.log()
         console.log(ircmsg.message)
         console.log(send_msg)
 
