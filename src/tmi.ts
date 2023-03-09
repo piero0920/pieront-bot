@@ -30,24 +30,22 @@ export async function listenChannel(c: Channel) {
             case "PRIVMSG":
                 if(ircmsg.message == '!ping'){
                     pong(c, ircmsg)
-                    return
                 }
                 if(ircmsg.message == '!vod' && should_chat){
                     last_vod(c, ircmsg, channel_db)
-                    return
                 }
-                if(bot_regex.test(ircmsg.message) && should_chat){
+                if(bot_regex.test(ircmsg.message)){
                     await chat_with_bot(c,ircmsg,channel_db)
-                    return
                 }
-                if(mod_regex.test(ircmsg.message) && should_chat){
+                if(mod_regex.test(ircmsg.message)){
                     random_emote(c,channel_db)
-                    return
                 }
+                /*
                 if(random1 % random2 === 0){
                     random_emote(c, channel_db)
                     return
                 }
+                */
         }
     }
 }
