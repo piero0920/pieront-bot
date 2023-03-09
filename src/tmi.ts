@@ -20,8 +20,6 @@ export async function listenChannel(c: Channel) {
             console.log('Error getting channel Database')
             return
         }
-
-        const should_chat = await get_should_chat(ircmsg, channel_db)
         
         const random1 = Math.floor(Math.random() * 100);
         const random2 = Math.floor(Math.random() * 100); 
@@ -30,9 +28,6 @@ export async function listenChannel(c: Channel) {
             case "PRIVMSG":
                 if(ircmsg.message == '!ping'){
                     pong(c, ircmsg)
-                }
-                if(!should_chat){
-                    return
                 }
                 if(ircmsg.message == '!vod'){
                     last_vod(c, ircmsg, channel_db)
