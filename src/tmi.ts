@@ -40,11 +40,9 @@ export async function listenChannel(c: Channel) {
                 }
                 if(random1 % random2 === 0){
                     random_emote(c, channel_db)
-                    return
                 }
                 if(ircmsg.message == '!a'){
                     random_emote(c, channel_db)
-                    return
                 }
         }
     }

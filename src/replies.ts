@@ -2,6 +2,7 @@ import { Channel, IrcMessage, ChatCompletionResponseMessage, datetime } from 'de
 import { channelDatabase, chatBotMsgDatabase, chatOpenAIResponse, cooldown } from 'interfaces'
 import db, { saveToDB } from 'app/src/database.ts'
 import { chatOpenAI } from 'app/src/openai.ts'
+import config from 'app/src/config.ts'
 
 export function pong(c:Channel, ircmsg: IrcMessage){
     console.log('pinged by', ircmsg.username)
@@ -123,6 +124,13 @@ export async function chat_with_bot(c:Channel, ircmsg: IrcMessage, channel_db: c
     
     if(user){
         const user_chat = db.msg_db.get(msg_id)
+        console.log(ircmsg.message.slice(config.TWITCH_BOT_USERNAME.length + 2))
+        if(ircmsg.message.slice(config.TWITCH_BOT_USERNAME.length + 2) === 'olvidame'){
+            await cleanMsgs(msg_id, user_chat)
+            c.send('he olvidado nuestro historial')
+            return
+        }
+
         if(user_chat.msgs.length){
             current_msg.push(...user_chat.msgs, user_msg)
         }else {
@@ -175,7 +183,7 @@ export async function chat_with_bot(c:Channel, ircmsg: IrcMessage, channel_db: c
 
 function check_for_double(full_msg: ChatCompletionResponseMessage[], user_msg: ChatCompletionResponseMessage){
     const filtered = full_msg.filter(e=>e.role != "system")
-    if(filtered.at(-3) == user_msg){
+    if(JSON.stringify(filtered.at(-3)) === JSON.stringify(user_msg)){
         return true
     }else {
         return false
@@ -190,8 +198,7 @@ async function cleanMsgs(user_id: string, user: chatBotMsgDatabase){
 async function handle_limits(user_id: string, user: chatBotMsgDatabase){
     const bot = db.bot_db.get("bot")
     const filtered = user.msgs.filter(e=>e.role != "system")
-    const should_ttl = is_cooled_down(user.ttl)
-    console.log(user.tokens, bot.token_limit, filtered.length, bot.historial_limit, !should_ttl)
+    console.log(user.tokens, bot.token_limit, filtered.length, bot.historial_limit)
     if(user.tokens > bot.token_limit){
         await cleanMsgs(user_id,user)
     }
@@ -282,4 +289,5 @@ export function random_emote(c:Channel, channel_db: channelDatabase){
     const emotes = get_emotes(channel_db)
     const random = Math.floor(Math.random() * emotes.length)
     c.send(emotes[random])
+    return
 }
