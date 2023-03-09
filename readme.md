@@ -31,16 +31,13 @@ When the Chat length in the chat logs of the roles: `user` and `assistant` exced
 
 From the first time or the user interact with the bot or when the chat log length is 0, a `ttl` is created by adding the current date and the set `historial clean in` in the config file, the chat log will be reseted 
 
-[![deno compatibility][Shield.Deno]][Deno.land]
-[![deno compatibility][Shield.Tmi]][TMI.module]
-
 ## Config
 
 * config.json
 
 ```json
 {
-    "historialLimit": 50, // The max chat length for user and assistant                   
+    "historialLimit": 50, // The max chat length for user and assistant
     "historialCleanInHours": 5, // Reset user's chat every n hours
     "tokenLimit": 2500, // The max token limit
     "cooldownTimeInSec": 20, // @depreacted
