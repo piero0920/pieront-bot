@@ -1,7 +1,7 @@
 import { TwitchChat, Channel } from 'deps'
 import config from 'app/src/config.ts'
 import db from 'app/src/database.ts'
-import { pong, last_vod, chat_with_bot, get_should_chat, random_emote } from 'app/src/replies.ts'
+import { pong, last_vod, chat_with_bot, random_emote } from 'app/src/replies.ts'
 
 const client = new TwitchChat(config.TWITCH_BOT_TOKEN, config.TWITCH_BOT_USERNAME)
 

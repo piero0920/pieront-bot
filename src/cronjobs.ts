@@ -11,7 +11,7 @@ for(const c of local_config.channels){
 
 export function runCronjobs(){
     console.log('Cronjobs are registring')
-    //every 5 minutes
+    // every 5 minutes
     cron('*/5 * * * *', async()=>{
         for(const channel of channels){
             const channel_db = db.channel_db.get(channel)
@@ -24,7 +24,7 @@ export function runCronjobs(){
             await saveToDB(db.channel_db, channel, channel_db)
         }
     })
-    //every 1 hour
+    // every 1 hour
     cron('0 * * * *', async()=>{
         for(const channel of channels){
             await update_emotes(channel)

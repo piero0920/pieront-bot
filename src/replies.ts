@@ -198,9 +198,6 @@ async function handle_limits(user_id: string, user: chatBotMsgDatabase){
     if(filtered.length > bot.historial_limit){
         await cleanMsgs(user_id,user)
     }
-    if(!should_ttl){
-        await cleanMsgs(user_id,user)
-    }
 }
 
 function is_cooled_down(cooldown_time: number){
