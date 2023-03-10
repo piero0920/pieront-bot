@@ -13,11 +13,10 @@ export async function chatOpenAI(msg:ChatCompletionRequestMessage[], user:string
     const response = await openai.createChatCompletion({
         model: "gpt-3.5-turbo",
         messages: msg,
-        temperature: 0.9,
-        top_p: 1,
+        temperature: 1.8,
         max_tokens: 75,
-        frequency_penalty: 0,
-        presence_penalty: 0.6,
+        frequency_penalty: 1,
+        presence_penalty: 1,
         user: user,
     })
     try {
