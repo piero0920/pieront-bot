@@ -288,6 +288,8 @@ function get_emotes(channel_db: channelDatabase){
 export function random_emote(c:Channel, channel_db: channelDatabase){
     const emotes = get_emotes(channel_db)
     const random = Math.floor(Math.random() * emotes.length)
-    c.send(emotes[random])
+    if(!channel_db.is_live){
+        c.send(emotes[random])
+    }
     return
 }
