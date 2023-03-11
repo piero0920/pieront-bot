@@ -1,7 +1,7 @@
 import { TwitchChat, Channel } from 'deps'
 import config from 'app/src/config.ts'
 import db from 'app/src/database.ts'
-import { pong, last_vod, chat_with_bot, random_emote } from 'app/src/replies.ts'
+import { pong, last_vod, chat_with_bot, random_emote, tellMeThatAnime, tellMeThatSong } from 'app/src/replies.ts'
 
 const client = new TwitchChat(config.TWITCH_BOT_TOKEN, config.TWITCH_BOT_USERNAME)
 
@@ -43,6 +43,13 @@ export async function listenChannel(c: Channel) {
                 }
                 if(ircmsg.message == '!a'){
                     random_emote(c, channel_db)
+                }
+                // Testing
+                if(ircmsg.message == '!!anime' && ircmsg.username == config.TWITCH_BOT_MOD){
+                    await tellMeThatAnime(c, ircmsg, channel_db)
+                }
+                if(ircmsg.message == '!!song' && ircmsg.username == config.TWITCH_BOT_MOD){
+                    await tellMeThatSong(c, ircmsg, channel_db)
                 }
         }
     }

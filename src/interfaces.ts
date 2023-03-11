@@ -156,3 +156,68 @@ export interface validateToken {
     client_id           : string;
     expires_in          : number;
 }
+
+export interface PlaybackAccessError {
+    message: string;
+    path: string[]
+}
+
+export interface videoPlaybackAccessToken{
+    errors: PlaybackAccessError[];
+    data: {
+        streamPlaybackAccessToken: {
+            value: string;
+            signature: string;
+        },
+        videoPlaybackAccessToken: {
+            value: string;
+            signature: string;
+        }
+    }
+}
+
+export interface auudResult {
+    artist      : string;
+    title       : string;
+    album       : string;
+    release_date: string;
+    label       : string;
+    timecode    : string;
+    song_link   : string;
+}
+
+export interface auddResponse {
+    status      : string;
+    result      : auudResult | null
+}
+
+export interface traceMoeAnilistTitle {
+    native      : string;
+    romaji      : string;
+    english     : string;
+}
+
+export interface traceMoeAnilist {
+    id          : number;
+    idMal       : number;
+    title       : traceMoeAnilistTitle;
+    synonyms    : string[];
+    isAdult     : boolean;
+}
+
+export interface traceMoeResult {
+    anilist     : traceMoeAnilist;
+    filename    : string;
+    episode     : number | null;
+    from        : number;
+    to          : number;
+    similarity  : number;
+    video       : string;
+    image       : string;
+}
+
+export interface traceMoe {
+    frameCount  : number;
+    error       : string;
+    result      : traceMoeResult[];
+}

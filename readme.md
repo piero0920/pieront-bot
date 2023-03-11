@@ -7,9 +7,11 @@ Pieront is a chat bot on twitch that uses OpenAI `gpt-3.5-turbo` model to intera
 Command|Description|Response
 :---|:---|:---
 !ping | Check if bot its on chat room. | Pong! Hi, `user` I'm currently running on Deno, `Deno Version`. Your chat color is `user color`.
-!vod | Get latest public vod of channel. | Ultimo vod: https://www.twitch.tv/videos/`video id`
+!vod | Get latest public vod of channel. | Ultimo vod: https://www.twitch.tv/videos/ `video id`
 !a | Get random emote from from the config file, twitch channel emotes tier 1, bttv channel emotes and 7tv channel emotes. | `emote`
 @Botname | Interact with bot, ask anything and it'll answer. | `user` `response`
+!!anime | Detects whatever anime is on the live stream. **Currently on development.** | `user` El nombre del anime es `anime name`. Episodio `anime ep`. EXEC: `start-end`
+!!song | Detects whatever song is playing on the live stream. **Currently on development.** | `user` La cancion es `song title` por `song artist`. EXEC: `start-end`
 
 Do you want to add any extra command?
 
@@ -70,6 +72,8 @@ From the first time or the user interact with the bot or when the chat log lengt
 TWITCH_CLIENT_ID=""
 TWITCH_CLIENT_SECRET=""
 
+# there's a tutorial here: https://youtu.be/1MBsUoFGuls
+TWITCH_OAUTH_TOKEN=""
 
 TWITCH_BOT_NAME=""          # The username of the owner of the client id and secret
 TWITCH_BOT_MOD_NAME=""      # Your username
@@ -80,6 +84,9 @@ TWITCH_BOT_TOKEN=""
 
 # Create a new secret key at https://platform.openai.com/account/api-keys
 OPENAI_API_KEY=""
+
+# Get your api token at https://dashboard.audd.io/
+AUUD_API_TOKEN=""
 ```
 
 ## Add Pieront to your channel

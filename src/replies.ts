@@ -3,6 +3,7 @@ import { channelDatabase, chatBotMsgDatabase, chatOpenAIResponse, cooldown } fro
 import db, { saveToDB } from 'app/src/database.ts'
 import { chatOpenAI } from 'app/src/openai.ts'
 import config from 'app/src/config.ts'
+import { BuildStreamURL, downloadAudio, downloadImage, getAnimeData, getSongData } from "app/src/api.ts"
 
 export function pong(c:Channel, ircmsg: IrcMessage){
     console.log('pinged by', ircmsg.username)
@@ -292,4 +293,92 @@ export function random_emote(c:Channel, channel_db: channelDatabase){
         c.send(emotes[random])
     }
     return
+}
+
+export async function tellMeThatAnime(c: Channel, ircmsg: IrcMessage,channel_db: channelDatabase){
+    console.log('Anime request by', ircmsg.username)
+    if(!channel_db.is_live){
+        c.send(`${ircmsg.username} ${channel_db.channel_name} no esta en directo.`)
+        return
+    }
+    const start = new Date()
+
+    const m3u8_url = await BuildStreamURL(channel_db.channel_name)
+
+    if(!m3u8_url){
+        c.send(`${ircmsg.username} toy de lado, no puedo.`)
+        console.log("no m3u8 url")
+        return
+    }
+    await downloadImage(m3u8_url.href, channel_db.channel_name)
+
+    const data = await getAnimeData(channel_db.channel_name)
+
+    if(!data || !data?.result.length){
+        c.send(`${ircmsg.username} toy lento, o no se esta viendo algun anime.`)
+        console.log("no data", data)
+        return
+    }
+    const anime = data?.result[0]
+    if(!anime){
+        c.send(`${ircmsg.username} toy lento, o no se esta viendo algun anime.`)
+        return
+    }
+
+    let send_msg = `El nombre del anime es ${anime.anilist.title.romaji || anime.anilist.title.native || anime.anilist.title.english}.`
+
+    if(anime.episode){
+        send_msg += ` Episodio ${anime.episode}.`
+    }
+    const endTime = new Date()
+    const end = endTime.valueOf() - start.valueOf()
+    const endInSeconds = end / 1000
+
+    c.send(`${ircmsg.username} ${send_msg} EXEC: ${endInSeconds}s.`)
+}
+
+export async function tellMeThatSong(c: Channel, ircmsg: IrcMessage,channel_db: channelDatabase){
+    console.log('Song request by', ircmsg.username)
+    if(!channel_db.is_live){
+        c.send(`${ircmsg.username} ${channel_db.channel_name} no esta en directo.`)
+        return
+    }
+    const start = new Date()
+
+    const m3u8_url = await BuildStreamURL(channel_db.channel_name)
+
+    if(!m3u8_url){
+        c.send(`${ircmsg.username} toy de lado, no puedo.`)
+        console.log("no m3u8 url")
+        return
+    }
+
+    await downloadAudio(m3u8_url.href, channel_db.channel_name)
+
+    const data = await getSongData(channel_db.channel_name)
+
+    if(!data || data.result == null){
+        c.send(`${ircmsg.username} toy lento, o no se escucha una cancion.`)
+        console.log("no data", data)
+        return
+    }
+
+    const song  = data?.result
+
+    if(!song){
+        c.send(`${ircmsg.username} toy lento, o no se escucha una cancion.`)
+        return
+    }
+
+    let send_msg = `La cancion es ${song.title} por ${song.artist}.`
+
+    if(ircmsg.message.includes("link")){
+        send_msg += ` El link es ${song.song_link}`
+    }
+
+    const endTime = new Date()
+    const end = endTime.valueOf() - start.valueOf()
+    const endInSeconds = end / 1000
+
+    c.send(`${ircmsg.username} ${send_msg} EXEC: ${endInSeconds}s.`)
 }

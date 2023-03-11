@@ -2,9 +2,15 @@ import config from 'app/src/config.ts'
 import { 
     accessToken, twitchApiError, botDatabase, TwitchUserResponse, 
     TwitchVideoResponse, TwitchStreamResponse, TwitchEmoteResponse,
-    bttvEmoteResponse, ztvEmote, validateToken } from 'interfaces'
+    bttvEmoteResponse, ztvEmote, validateToken, videoPlaybackAccessToken,
+    auddResponse, traceMoe } from 'interfaces'
 import db, { saveToDB } from 'app/src/database.ts'
-import { datetime } from 'deps'
+import { datetime, fs, path } from 'deps'
+
+const MEDIA_PATH = "media"
+await fs.ensureDir(MEDIA_PATH)
+
+const DECODER = new TextDecoder()
 
 export async function get_auth_token(){
     const url = new URL('https://id.twitch.tv/oauth2/token')
@@ -180,5 +186,131 @@ export async function get_7tv_emotes(channel_id: string){
         return emotes
     }else {
         throw 'Error getting 7tv channel emotes for ' + channel_id
+    }
+}
+
+export async function BuildStreamURL(channel:string){
+    const BodyQuery = JSON.stringify({
+        operationName: "PlaybackAccessToken",
+        extensions: {
+            persistedQuery: {
+                version: 1,
+                sha256Hash: "0828119ded1c13477966434e15800ff57ddacf13ba1911c129dc2200705b0712"
+            }
+        },
+        variables: {
+            isLive: true,
+            login: channel,
+            isVod: false,
+            vodID: "",
+            playerType: "embed"
+        }
+    })
+    const Resp = await fetch("https://gql.twitch.tv/gql", {
+        method: "POST",
+        headers: {
+            "Client-ID": "kimne78kx3ncx6brgo4mv6wki5h1ko",
+            "Authorization": `OAuth ${config.TWITCH_OAUTH}`,
+            'Content-Type': 'application/json',
+        },
+        body: BodyQuery
+    })
+    if(!Resp.ok) {
+        const error = await Resp.json()
+        console.log("error getting url", error)
+        return 
+    }
+    const VideoResponse:videoPlaybackAccessToken = await Resp.json()
+    const live_url = new URL(`https://usher.ttvnw.net/api/channel/hls/${channel}.m3u8`)
+    live_url.searchParams.append("client_id", "kimne78kx3ncx6brgo4mv6wki5h1ko")
+    live_url.searchParams.append("token", VideoResponse.data.streamPlaybackAccessToken.value)
+    live_url.searchParams.append("sig", VideoResponse.data.streamPlaybackAccessToken.signature)
+    live_url.searchParams.append("allow_source", "true")
+    live_url.searchParams.append("fast_bread", "true")
+    live_url.searchParams.append("player_backend", "mediaplayer")
+    live_url.searchParams.append("playlist_include_framerate", "true")
+
+    return live_url
+}
+
+export async function getSongData(channel: string){
+    const formData = new FormData();
+    const fileData = await Deno.readFile(path.join(MEDIA_PATH,`${channel}.mp3`));
+    
+    formData.append("api_token", config.AUUD_API_TOKEN);
+    formData.append("file", new Blob([fileData]), `${channel}.mp3`);
+    
+    const response = await fetch("https://api.audd.io/", { method: "POST", body: formData });
+    
+    if(response.ok){
+        const responseData: auddResponse = await response.json();
+        return responseData
+    }else {
+        const error = await response.json();
+        console.log("Error getting song data", error.message)
+        return
+    }
+}
+
+export async function getAnimeData(channel: string){
+    const fileData = await Deno.readFile(path.join(MEDIA_PATH,`${channel}.jpg`));
+    const response = await fetch("https://api.trace.moe/search?anilistInfo", { 
+        method: "POST", 
+        body: fileData, 
+        headers: { "Content-type": "image/jpeg" } 
+    });
+
+    if(response.ok){
+        const responseData: traceMoe = await response.json();
+        return responseData
+    }else {
+        const error = await response.json();
+        console.log("Error getting anime data", error)
+        return
+    }
+}
+
+export async function downloadAudio(m3u8_url: string, channel: string){
+
+    const cmd = new Deno.Command("ffmpeg", {
+        args: [
+            "-hide_banner", 
+            "-loglevel", "error",
+            "-t", "30",
+            "-i", m3u8_url,
+            "-y", path.join(MEDIA_PATH,`${channel}.mp3`)
+        ]
+    })
+
+    const cmdOut = await cmd.output()
+
+    const error = DECODER.decode(cmdOut.stderr)
+
+    if(!cmdOut.success){
+        console.log("error downloading audio", error)
+        return
+    }
+}
+
+export async function downloadImage(m3u8_url: string, channel: string){
+
+    const cmd = new Deno.Command("ffmpeg", {
+        args: [
+            "-hide_banner", 
+            "-loglevel", "error",
+            "-i", m3u8_url,
+            "-frames:v", "1", 
+            "-q:v", "2",
+            "-y", path.join(MEDIA_PATH,`${channel}.jpg`)
+        ]
+    })
+
+    const cmdOut = await cmd.output()
+
+    const error = DECODER.decode(cmdOut.stderr)
+
+    if(!cmdOut.success){
+        console.log("error downloading audio", error)
+        return
     }
 }

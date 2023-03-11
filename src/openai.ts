@@ -3,7 +3,7 @@ import { Configuration, OpenAIApi, ChatCompletionRequestMessage  } from 'deps'
 import { chatOpenAIResponse } from 'interfaces'
 
 const configuration = new Configuration({
-    apiKey: config.API_KEY,
+    apiKey: config.OPENAI_API_KEY,
 });
 
 const openai = new OpenAIApi(configuration);

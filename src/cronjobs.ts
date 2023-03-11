@@ -11,8 +11,8 @@ for(const c of local_config.channels){
 
 export function runCronjobs(){
     console.log('Cronjobs are registring')
-    // every 5 minutes
-    cron('*/5 * * * *', async()=>{
+    // every 2 minutes
+    cron('*/2 * * * *', async()=>{
         for(const channel of channels){
             const channel_db = db.channel_db.get(channel)
             const is_live = await is_channel_live(channel_db.channel_id)

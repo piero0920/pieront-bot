@@ -11,10 +11,12 @@ export const local_config:localConfig = JSON.parse(local_config_data)
 const config = {
     TWITCH_CLIENT: <string>Deno.env.get("TWITCH_CLIENT_ID"),
     TWITCH_SECRET: <string>Deno.env.get("TWITCH_CLIENT_SECRET"),
+    TWITCH_OAUTH: <string>Deno.env.get("TWITCH_OAUTH_TOKEN"),
     TWITCH_BOT_USERNAME: <string>Deno.env.get("TWITCH_BOT_NAME")?.toLowerCase(),
     TWITCH_BOT_TOKEN: <string>Deno.env.get("TWITCH_BOT_TOKEN"),
     TWITCH_BOT_MOD: <string>Deno.env.get("TWITCH_BOT_MOD_NAME")?.toLowerCase(),
-    API_KEY: <string>Deno.env.get("OPENAI_API_KEY")
+    OPENAI_API_KEY: <string>Deno.env.get("OPENAI_API_KEY"),
+    AUUD_API_TOKEN: <string>Deno.env.get("AUUD_API_TOKEN"),
 }
 
 export function validate_settings(){

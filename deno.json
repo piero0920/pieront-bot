@@ -5,7 +5,7 @@
         "interfaces": "./src/interfaces.ts"
     },
     "tasks": {
-        "start": "deno run --allow-read --allow-write --allow-net --allow-env main.ts",
+        "start": "deno run --allow-read --allow-write --allow-net --allow-env --allow-run main.ts",
         "dev": "deno run --allow-all --watch main.ts",
         "test": "deno run --allow-all --watch test.ts"
     }
