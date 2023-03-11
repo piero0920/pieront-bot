@@ -101,6 +101,20 @@ Open and issue with the tag "channel", tell me why do you want the bot in your c
 }
 ```
 
+## Requirements
+
+- [Deno ^1.31](https://deno.land/manual/getting_started/installation)
+- [Ffmpeg](https://ffmpeg.org/download.html)
+
+## Getting started
+
+1. Install deno.
+2. Install ffmpeg.
+3.  `git clone https://github.com/piero0920/pieront-bot.git`
+4.  `cd pieront-bot`
+5.  Copy config.json and .env files
+5.  `deno task start`
+
 ## Contributing
 
 Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
