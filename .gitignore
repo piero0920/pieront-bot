@@ -2,3 +2,4 @@
 database/
 media/
 test.ts
+deno.lock

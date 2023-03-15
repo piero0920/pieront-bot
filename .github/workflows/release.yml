@@ -24,7 +24,10 @@ jobs:
       - name: Install Deno
         uses: denoland/setup-deno@v1
         with:
-          deno-version: v1.3.x
+          deno-version: v1.x
+
+      - name: Cache Deno
+        run: deno cache deps.ts
 
       - name: Build for Windows
         run: deno compile --allow-read --allow-write --allow-net --allow-env --allow-run --target x86_64-pc-windows-msvc -o pieront-windows.exe main.ts
