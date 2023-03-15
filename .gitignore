@@ -3,3 +3,5 @@ database/
 media/
 test.ts
 deno.lock
+pieront-windows.exe
+pieront-linux

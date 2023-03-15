@@ -7,6 +7,10 @@
     "tasks": {
         "start": "deno run --allow-read --allow-write --allow-net --allow-env --allow-run main.ts",
         "dev": "deno run --allow-all --watch main.ts",
-        "test": "deno run --allow-all --watch test.ts"
+        "test": "deno run --allow-all --watch test.ts",
+        "compile_windows": "deno compile --allow-read --allow-write --allow-net --allow-env --allow-run --target x86_64-pc-windows-msvc -o pieront-windows.exe main.ts",
+        "compile_linux:": "deno compile --allow-read --allow-write --allow-net --allow-env --allow-run --target x86_64-unknown-linux-gnu -o pieront-linux main.ts",
+        "pm2_linux": "pm2 start pieront-linux --name bot",
+        "setup_linux": "deno task compile_linux && pm2_linux"
     }
 }
