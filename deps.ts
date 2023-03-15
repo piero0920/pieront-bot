@@ -11,3 +11,4 @@ export type { ChatCompletionResponseMessage, ChatCompletionRequestMessage } from
 export { TwitchChat, Channel } from "https://deno.land/x/tmi@v1.0.6/mod.ts";
 export type { IrcMessage } from "https://deno.land/x/tmi@v1.0.6/mod.ts";
 export { cron } from 'https://deno.land/x/deno_cron@v1.0.0/cron.ts';
+export * as schemaValidator from "https://raw.githubusercontent.com/piero0920/schema_validator/master/mod.ts";

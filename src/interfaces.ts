@@ -220,3 +220,41 @@ export interface traceMoe {
     error       : string;
     result      : traceMoeResult[];
 }
+
+export const localConfigShema = {
+    historialLimit: {
+        type: Number
+    },
+    historialCleanInHours: {
+        type: Number
+    },
+    tokenLimit: {
+        type: Number
+    },
+    cooldownTimeInSec: {
+        type: Number
+    },
+    globalPrompt: {
+        type: String
+    },
+    globalMessageModel:[{
+        role: {
+            type: String
+        },
+        content: {
+            type: String
+        }
+    }],
+    globalEmotes: [{type: String}],
+    channels: [{
+        channel: {
+            type: String
+        },
+        description: {
+            type: String
+        },
+        customPrompt: {
+            type: String
+        },
+    }],
+};

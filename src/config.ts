@@ -1,8 +1,8 @@
 import "https://deno.land/std@0.177.0/dotenv/load.ts"
 import db, { saveToDB } from "app/src/database.ts";
 import { get_auth_token, get_user, get_vods, is_channel_live, get_twitch_emotes, get_bttv_emotes, get_7tv_emotes } from 'app/src/api.ts'
-import { botDatabase, localConfig, channelDatabase } from "interfaces";
-import { datetime, ChatCompletionOptions } from 'deps'
+import { botDatabase, localConfig, channelDatabase, localConfigShema } from "interfaces";
+import { datetime, ChatCompletionOptions, schemaValidator } from 'deps'
 
 const local_config_data = await Deno.readTextFile('config.json')
 export const local_config:localConfig = JSON.parse(local_config_data)
@@ -19,8 +19,32 @@ const config = {
     AUUD_API_TOKEN: <string>Deno.env.get("AUUD_API_TOKEN"),
 }
 
-export function validate_settings(){
+export async function validate_settings(){
     console.log('Validating settings')
+
+    try {
+        const _config = await Deno.readTextFile("config.json")
+        const _env = await Deno.readTextFile(".env")
+    } catch (error) {
+        if (!(error instanceof Deno.errors.NotFound)) {
+            throw error;
+        }
+        throw "Ensure if config.json or .env exits"
+    }
+
+    try {
+        const _config = await Deno.readTextFile('config.json')
+        JSON.parse(_config);
+    } catch {
+        throw "Ensure if config file is on json format"
+    }
+
+    const _config = await Deno.readTextFile("config.json")
+    const err = schemaValidator.validate(JSON.parse(_config), localConfigShema, { allowUnknown: false });
+    if(err){
+        throw err.message
+    }
+    
     if(Object.values(config).some(e=> e === undefined)){
         let Missing!: string;
         Object.keys(config).some(e=>{
