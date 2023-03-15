@@ -1,0 +1,74 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+    # Only run when the commit message contains "Bump version"
+    paths-ignore:
+      - README.md
+      - '*.md'
+    # The following assumes that the commit message is in the first line of the commit message.
+    # If the commit message is multiline, you may need to adjust the pattern below.
+    # For more information, see https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#filter-pattern-cheat-sheet
+    if: 'contains(github.event.head_commit.message, "Bump version")'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.3.x
+
+      - name: Build for Windows
+        run: deno compile --allow-read --allow-write --allow-net --allow-env --allow-run --target x86_64-pc-windows-msvc -o pieront-windows.exe main.ts
+
+      - name: Build for linux
+        run: deno compile --allow-read --allow-write --allow-net --allow-env --allow-run --target x86_64-unknown-linux-gnu -o pieront-linux main.ts
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.run_number }}
+          release_name: Release ${{ github.run_number }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Assets
+        id: upload-release-assets
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./pieront-linux
+          asset_name: pieront-linux
+          asset_content_type: application/javascript
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./pieront-windows.exe
+          asset_name: pieront-windows.exe
+          asset_content_type: application/javascript
+
+      - name: Zip source code
+        run: |
+          zip -r source.zip .
+        shell: bash
+
+      - name: Upload Source Code
+        uses: actions/upload-artifact@v2
+        with:
+          name: source-code
+          path: source.zip

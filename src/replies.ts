@@ -1,4 +1,4 @@
-import { Channel, IrcMessage, ChatCompletionResponseMessage, datetime } from 'deps'
+import { Channel, IrcMessage, ChatCompletionOptions, ChatCompletion, datetime } from 'deps'
 import { channelDatabase, chatBotMsgDatabase, chatOpenAIResponse, cooldown } from 'interfaces'
 import db, { saveToDB } from 'app/src/database.ts'
 import { chatOpenAI } from 'app/src/openai.ts'
@@ -30,7 +30,7 @@ function get_msg_id(ircmsg: IrcMessage, channel_db: channelDatabase){
 
 function build_first_msg(channel_db: channelDatabase){
     const bot = db.bot_db.get("bot")
-    const first_msg:ChatCompletionResponseMessage[] = [
+    const first_msg:ChatCompletionOptions["messages"] = [
         {
             role: "system",
             content: `Eres ${bot.bot_channel_name} y ${bot.global_prompt}`
@@ -53,7 +53,7 @@ function build_first_msg(channel_db: channelDatabase){
 
 function build_user_msg(ircmsg: IrcMessage){
     const msg = ircmsg.message.slice(9)
-    const user_msg:ChatCompletionResponseMessage = {
+    const user_msg:ChatCompletion["choices"][0]["message"] = {
         role: "user",
         content: msg
     }
@@ -83,7 +83,7 @@ function build_first_user(c:Channel, ircmsg: IrcMessage, channel_db: channelData
 
 function get_reminder(channel_db: channelDatabase){
     const bot = db.bot_db.get("bot")
-    const reminder:ChatCompletionResponseMessage = {
+    const reminder:ChatCompletion["choices"][0]["message"] = {
         role: "system",
         content: "Remenber stay in character " + bot.global_prompt
     }
@@ -93,7 +93,7 @@ function get_reminder(channel_db: channelDatabase){
     return reminder
 }
 
-function get_reminder_boolean(chats: ChatCompletionResponseMessage[]) {
+function get_reminder_boolean(chats: ChatCompletionOptions["messages"]) {
     const filtered = chats.filter(e=>e.role != "system")
     if(filtered.length % 8 === 0 || filtered.length + 1 % 8 === 0 || filtered.length - 1 % 8 === 0){
         return true
@@ -103,7 +103,7 @@ function get_reminder_boolean(chats: ChatCompletionResponseMessage[]) {
 
 }
 
-async function update_user_msg(user_id: string, chat_response: chatOpenAIResponse, chats: ChatCompletionResponseMessage[]){
+async function update_user_msg(user_id: string, chat_response: chatOpenAIResponse, chats: ChatCompletionOptions["messages"]){
     if(chat_response.success && chat_response.tokens){
         const tokens = chat_response.tokens
         const user = db.msg_db.get(user_id)
@@ -120,7 +120,7 @@ export async function chat_with_bot(c:Channel, ircmsg: IrcMessage, channel_db: c
     const msg_id = get_msg_id(ircmsg, channel_db)
     const user = db.msg_db.contains(msg_id)
     
-    const current_msg: ChatCompletionResponseMessage[] = []
+    const current_msg: ChatCompletionOptions["messages"] = []
     const user_msg = build_user_msg(ircmsg)
     
     if(user){
@@ -167,7 +167,7 @@ export async function chat_with_bot(c:Channel, ircmsg: IrcMessage, channel_db: c
             current_msg.push(reminder)
         }
     }else {
-        console.log('Error getting chat response', response.status_text)
+        console.log('Error getting chat response')
     }
 
     if(user){
@@ -182,7 +182,7 @@ export async function chat_with_bot(c:Channel, ircmsg: IrcMessage, channel_db: c
     }
 }
 
-function check_for_double(full_msg: ChatCompletionResponseMessage[], user_msg: ChatCompletionResponseMessage){
+function check_for_double(full_msg: ChatCompletionOptions["messages"], user_msg: ChatCompletion["choices"][0]["message"]){
     const filtered = full_msg.filter(e=>e.role != "system")
     if(JSON.stringify(filtered.at(-3)) === JSON.stringify(user_msg)){
         return true

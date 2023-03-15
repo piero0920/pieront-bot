@@ -1,4 +1,4 @@
-import { ChatCompletionResponseMessage } from 'deps'
+import { ChatCompletionOptions, ChatCompletion } from 'deps'
 
 export interface botDatabase {
     bot_channel_id      : string;
@@ -7,7 +7,7 @@ export interface botDatabase {
     expires_in_date     : number;
     global_emotes       : string[];
     global_prompt       : string;
-    globalMessageModel  : ChatCompletionResponseMessage[]
+    globalMessageModel  : ChatCompletionOptions["messages"]
     historial_limit     : number;
     historial_clean_in  : number;
     token_limit         : number;
@@ -45,7 +45,7 @@ export interface localConfig {
     channels            : channelLocalConfig[];
     globalEmotes        : string[];
     globalPrompt        : string;
-    globalMessageModel  : ChatCompletionResponseMessage[];
+    globalMessageModel  : ChatCompletionOptions["messages"];
     historialLimit      : number;
     historialCleanInHours: number;
     tokenLimit          : number;
@@ -92,7 +92,7 @@ export interface chatBotMsgDatabase{
     ttl                 : number;
     tokens              : number;
     cooldown_time       : number;
-    msgs                : ChatCompletionResponseMessage[]
+    msgs                : ChatCompletionOptions["messages"];
 }
 
 export interface TwitchVideo {
@@ -147,9 +147,8 @@ export interface ztvEmote {
 
 export interface chatOpenAIResponse {
     success             : boolean;
-    status_text         : string;
     tokens              : number | undefined;
-    msg                 : ChatCompletionResponseMessage | undefined;
+    msg                 : ChatCompletion["choices"][0]["message"] | undefined;
 }
 
 export interface validateToken {

@@ -2,7 +2,7 @@ import "https://deno.land/std@0.177.0/dotenv/load.ts"
 import db, { saveToDB } from "app/src/database.ts";
 import { get_auth_token, get_user, get_vods, is_channel_live, get_twitch_emotes, get_bttv_emotes, get_7tv_emotes } from 'app/src/api.ts'
 import { botDatabase, localConfig, channelDatabase } from "interfaces";
-import { datetime, ChatCompletionResponseMessage } from 'deps'
+import { datetime, ChatCompletionOptions } from 'deps'
 
 const local_config_data = await Deno.readTextFile('config.json')
 export const local_config:localConfig = JSON.parse(local_config_data)
@@ -55,7 +55,7 @@ export function validate_settings(){
 }
 
 function cleanGlobalMessageModel(){
-    const cleanModel:ChatCompletionResponseMessage[] = []
+    const cleanModel:ChatCompletionOptions["messages"] = []
     for(let i = 0; i < local_config.globalMessageModel.length; i++){
         if(i === 5){
             break
