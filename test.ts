@@ -1,5 +1,4 @@
 import * as validate from "https://raw.githubusercontent.com/piero0920/schema_validator/master/mod.ts";
-import { localConfig } from "interfaces"
 
 const localConfigShema = {
     historialLimit: {
