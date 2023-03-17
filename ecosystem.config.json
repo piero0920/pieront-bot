@@ -1,12 +1,10 @@
 {
-    "apps": [
-      {
-        "name": "bot",
-        "script": "./main.ts",
-        "interpreter": "deno",
-        "time": true,
-        "interpreterArgs": "run --allow-read --allow-write --allow-net --allow-env --allow-run"
-      }
-    ]
+  "apps": [
+    {
+      "name": "bot",
+      "script": "./pieront-linux",
+      "time": true
+    }
+  ]
 }
   
