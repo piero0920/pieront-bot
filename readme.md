@@ -10,9 +10,9 @@ Command|Description|Response
 !vod | Get latest public vod of channel. | Ultimo vod: https://www.twitch.tv/videos/ `video id`
 !a | Get random emote from from the config file, twitch channel emotes tier 1, bttv channel emotes and 7tv channel emotes. | `emote`
 @Botname | Interact with bot, ask anything and it'll answer. | `user` `response`
-!!anime | Detects whatever anime is on the live stream. **Currently on development.** | `user` El nombre del anime es `anime name`. Episodio `anime ep`. EXEC: `start-end`
+!!anime | Detects whatever anime is on the live stream. | `user` El nombre del anime es `anime name`. Episodio `anime ep`. EXEC: `start-end`
 !!song | Detects whatever song is playing on the live stream. **Currently on development.** | `user` La cancion es `song title` por `song artist`. EXEC: `start-end`
-
+!!a | Get a random message setted from config interaction. | `response`
 Do you want to add any extra command?
 
 Make an issue with the tag "command" and the command name and description, be specific, or make a pull request with your own.

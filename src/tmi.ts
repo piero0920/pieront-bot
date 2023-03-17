@@ -44,15 +44,15 @@ export async function listenChannel(c: Channel) {
                 if(ircmsg.message == '!a'){
                     random_emote(c, channel_db)
                 }
-                // Testing
-                if(ircmsg.message == '!!anime' && ircmsg.username == config.TWITCH_BOT_MOD){
+                if(ircmsg.message == '!aa' || ircmsg.username){
+                    await randomMsg(c, ircmsg)
+                }
+                if(ircmsg.message == '!!anime'){
                     await tellMeThatAnime(c, ircmsg, channel_db)
                 }
+                // Testing
                 if(ircmsg.message == '!!song' && ircmsg.username == config.TWITCH_BOT_MOD){
                     await tellMeThatSong(c, ircmsg, channel_db)
-                }
-                if(ircmsg.message == '!aa' && ircmsg.username == config.TWITCH_BOT_MOD){
-                    await randomMsg(c)
                 }
         }
     }

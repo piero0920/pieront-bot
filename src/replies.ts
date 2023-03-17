@@ -383,8 +383,8 @@ export async function tellMeThatSong(c: Channel, ircmsg: IrcMessage,channel_db: 
     c.send(`${ircmsg.username} ${send_msg} EXEC: ${endInSeconds}s.`)
 }
 
-export async function randomMsg(c: Channel) {
-    if(c.channelName !== config.TWITCH_BOT_MOD){        
+export async function randomMsg(c: Channel, ircmsg: IrcMessage) {
+    if(ircmsg.username !== config.TWITCH_BOT_MOD || ircmsg.message !== "!aa"){        
         const random_1 = Math.floor(Math.random() * 100);
         const random_2 = Math.floor(Math.random() * 100);
         if(random_1 % random_2 !== 0) return
