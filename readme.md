@@ -13,6 +13,7 @@ Command|Description|Response
 !!anime | Detects whatever anime is on the live stream. | `user` El nombre del anime es `anime name`. Episodio `anime ep`. EXEC: `start-end`
 !!song | Detects whatever song is playing on the live stream. **Currently on development.** | `user` La cancion es `song title` por `song artist`. EXEC: `start-end`
 !!a | Get a random message setted from config interaction. | `response`
+
 Do you want to add any extra command?
 
 Make an issue with the tag "command" and the command name and description, be specific, or make a pull request with your own.
