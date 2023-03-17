@@ -17,6 +17,7 @@ const config = {
     TWITCH_BOT_MOD: <string>Deno.env.get("TWITCH_BOT_MOD_NAME")?.toLowerCase(),
     OPENAI_API_KEY: <string>Deno.env.get("OPENAI_API_KEY"),
     AUUD_API_TOKEN: <string>Deno.env.get("AUUD_API_TOKEN"),
+    DISCORD_TOKEN: <string>Deno.env.get("DISCORD_TOKEN"),
 }
 
 export async function validate_settings(){

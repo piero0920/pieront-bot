@@ -2,7 +2,7 @@ import { Channel, IrcMessage, ChatCompletionOptions, ChatCompletion, datetime } 
 import { channelDatabase, chatBotMsgDatabase, chatOpenAIResponse, cooldown } from 'interfaces'
 import db, { saveToDB } from 'app/src/database.ts'
 import { chatOpenAI } from 'app/src/openai.ts'
-import config from 'app/src/config.ts'
+import config, { local_config } from 'app/src/config.ts'
 import { BuildStreamURL, downloadAudio, downloadImage, getAnimeData, getSongData } from "app/src/api.ts"
 
 export function pong(c:Channel, ircmsg: IrcMessage){
@@ -381,4 +381,18 @@ export async function tellMeThatSong(c: Channel, ircmsg: IrcMessage,channel_db: 
     const endInSeconds = end / 1000
 
     c.send(`${ircmsg.username} ${send_msg} EXEC: ${endInSeconds}s.`)
+}
+
+export async function randomMsg(c: Channel) {
+    if(c.channelName !== config.TWITCH_BOT_MOD){        
+        const random_1 = Math.floor(Math.random() * 100);
+        const random_2 = Math.floor(Math.random() * 100);
+        if(random_1 % random_2 !== 0) return
+    }
+
+    const response = await chatOpenAI(local_config.randomMsg, "piero")
+ 
+    if(!response.success) return
+    if(!response.msg) return
+    c.send(response.msg.content)
 }

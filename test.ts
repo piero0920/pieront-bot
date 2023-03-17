@@ -1,44 +1,7 @@
-import * as validate from "https://raw.githubusercontent.com/piero0920/schema_validator/master/mod.ts";
-
-const localConfigShema = {
-    historialLimit: {
-        type: Number
-    },
-    historialCleanInHours: {
-        type: Number
-    },
-    tokenLimit: {
-        type: Number
-    },
-    cooldownTimeInSec: {
-        type: Number
-    },
-    globalPrompt: {
-        type: String
-    },
-    globalMessageModel:[{
-        role: {
-            type: String
-        },
-        content: {
-            type: String
-        }
-    }],
-    globalEmotes: [{type: String}],
-    channels: [{
-        channel: {
-            type: String
-        },
-        description: {
-            type: String
-        },
-        customPrompt: {
-            type: String
-        },
-    }],
-};
+import { chatOpenAI } from "app/src/openai.ts";
+import { local_config } from "app/src/config.ts";
 
 
-const file = await Deno.readTextFile("config.json")
-const err = validate.validate(JSON.parse(file), localConfigShema, { allowUnknown: false });
-console.log(err?.message);
+const response = await chatOpenAI(local_config.randomMsg,"piero")
+
+console.log(response.msg?.content)

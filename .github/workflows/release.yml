@@ -51,10 +51,10 @@ jobs:
         run: deno cache deps.ts
 
       - name: Build for Windows
-        run: deno compile --allow-read --allow-write --allow-net --allow-env --allow-run --target x86_64-pc-windows-msvc -o pieront-windows.exe main.ts
+        run: deno task compile_windows
 
       - name: Build for linux
-        run: deno compile --allow-read --allow-write --allow-net --allow-env --allow-run --target x86_64-unknown-linux-gnu -o pieront-linux main.ts
+        run: deno task compile_linux
 
       - name: Download URL
         uses: actions/download-artifact@v2

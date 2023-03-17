@@ -50,6 +50,7 @@ export interface localConfig {
     historialCleanInHours: number;
     tokenLimit          : number;
     cooldownTimeInSec   : number;
+    randomMsg           : ChatCompletionOptions["messages"];
 }
 
 export interface TwitchUser {
@@ -257,4 +258,12 @@ export const localConfigShema = {
             type: String
         },
     }],
+    randomMsg: [{
+        role: {
+            type: String
+        },
+        content: {
+            type: String
+        }
+    }]
 };
