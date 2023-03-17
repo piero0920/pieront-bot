@@ -35,17 +35,11 @@ export async function listenChannel(c: Channel) {
                 if(bot_regex.test(ircmsg.message)){
                     await chat_with_bot(c,ircmsg,channel_db)
                 }
-                if(mod_regex.test(ircmsg.message)){
-                    random_emote(c,channel_db)
-                }
-                if(random1 % random2 === 0){
-                    random_emote(c, channel_db)
-                }
-                if(ircmsg.message == '!a'){
+                if(random1 % random2 === 0 || ircmsg.message == '!a' || mod_regex.test(ircmsg.message)){
                     random_emote(c, channel_db)
                 }
                 if(ircmsg.message == '!aa' || ircmsg.username){
-                    await randomMsg(c, ircmsg)
+                    await randomMsg(c, ircmsg, channel_db)
                 }
                 if(ircmsg.message == '!!anime'){
                     await tellMeThatAnime(c, ircmsg, channel_db)
