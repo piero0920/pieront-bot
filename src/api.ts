@@ -129,7 +129,8 @@ export async function get_vods(channel_id: string){
     if(vods.data.length){
         return vods.data
     }else {
-        throw 'Error getting vods for ' + channel_id
+        return []
+        //throw 'Error getting vods for ' + channel_id
     }
 }
 
@@ -160,7 +161,8 @@ export async function get_twitch_emotes(channel_id: string){
     if(emotes.data.length){
         return emotes.data
     }else {
-        throw 'Error getting twitch channel emotes for ' + channel_id
+        return []
+        //throw 'Error getting twitch channel emotes for ' + channel_id
     }
 }
 
@@ -173,7 +175,8 @@ export async function get_bttv_emotes(channel_id: string) {
     if(emotes.sharedEmotes){
         return emotes.sharedEmotes
     }else {
-        throw 'Error getting bttv channel emotes for ' + channel_id
+        return []
+        //throw 'Error getting bttv channel emotes for ' + channel_id
     }
 }
 
@@ -185,7 +188,8 @@ export async function get_7tv_emotes(channel_id: string){
     if(emotes){
         return emotes
     }else {
-        throw 'Error getting 7tv channel emotes for ' + channel_id
+        return []
+        //throw 'Error getting 7tv channel emotes for ' + channel_id
     }
 }
 

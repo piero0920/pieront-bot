@@ -36,6 +36,21 @@
             "channel": "kalathraslolweapon",
             "description": "Este canal de twitch es de KalathrasLolweapon, es tu streamer favorito, ",
             "customPrompt": "Disfrutas hacer netorare y te gustan las lolis."
+        },
+        {
+            "channel": "dzzael",
+            "description": "",
+            "customPrompt": ""
+        },
+        {
+            "channel": "juliop262",
+            "description": "",
+            "customPrompt": ""
+        },
+        {
+            "channel": "el_vende_manzanas",
+            "description": "",
+            "customPrompt": ""
         }
     ],
     "randomMsg": [

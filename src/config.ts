@@ -131,7 +131,7 @@ export async function load_channel_settings(){
             channel_id: user.id,
             created_at: user.created_at,
             is_live: is_live,
-            last_vod: vods[0].id,
+            last_vod: vods.length ? vods[0].id : "0",
             last_vod_date_sync: vod_date_sync,
             esta_callado: false,
             esta_callado_date: 0,
@@ -154,18 +154,24 @@ export async function update_emotes(channel: string){
         channel_in_db.bttv_emotes = []
         channel_in_db.ztv_emotes = []
         const tv_emotes = await get_twitch_emotes(channel_in_db.channel_id)
-        for(const emote of tv_emotes){
-            if(emote.tier && emote.tier.startsWith("1")){
-                channel_in_db.tv_emotes.push(emote.name)
+        if(tv_emotes.length){
+            for(const emote of tv_emotes){
+                if(emote.tier && emote.tier.startsWith("1")){
+                    channel_in_db.tv_emotes.push(emote.name)
+                }
             }
         }
         const bttv_emotes = await get_bttv_emotes(channel_in_db.channel_id)
-        for(const emote of bttv_emotes){
-            channel_in_db.bttv_emotes.push(emote.code)
+        if(bttv_emotes.length){
+            for(const emote of bttv_emotes){
+                channel_in_db.bttv_emotes.push(emote.code)
+            }
         }
         const ztv_emotes = await get_7tv_emotes(channel_in_db.channel_id)
-        for(const emote of ztv_emotes){
-            channel_in_db.ztv_emotes.push(emote.name)
+        if(ztv_emotes.length){
+            for(const emote of ztv_emotes){
+                channel_in_db.ztv_emotes.push(emote.name)
+            }
         }
         await saveToDB(db.channel_db, channel, channel_in_db)
     }

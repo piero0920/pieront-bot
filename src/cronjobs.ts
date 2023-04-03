@@ -19,7 +19,7 @@ export function runCronjobs(){
             const vods = await get_vods(channel_db.channel_id)
             const vods_date_sync = datetime().toMilliseconds()
             channel_db.is_live = is_live
-            channel_db.last_vod = vods[0].id
+            channel_db.last_vod = vods.length ? vods[0].id : "0"
             channel_db.last_vod_date_sync = vods_date_sync
             await saveToDB(db.channel_db, channel, channel_db)
         }
