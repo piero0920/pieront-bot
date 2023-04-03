@@ -51,6 +51,11 @@
             "channel": "el_vende_manzanas",
             "description": "",
             "customPrompt": ""
+        },
+        {
+            "channel": "ecualipto",
+            "description": "",
+            "customPrompt": ""
         }
     ],
     "randomMsg": [
