@@ -62,11 +62,11 @@ async function writeMigratedDB(data: dataFromDatabase[]){
 
 export async function startDB(){
     console.log('Starting database')
-    const data = await readMigratedDB()
+    //const data = await readMigratedDB()
     await bot_db.load()
     await channel_db.load()
     await msg_db.load()
-    await writeMigratedDB(data)
+    //await writeMigratedDB(data)
 }
 
 export async function saveToDB(db: DsDDB<botDatabase | channelDatabase | chatBotMsgDatabase>, key: string, doc: botDatabase | channelDatabase | chatBotMsgDatabase ){

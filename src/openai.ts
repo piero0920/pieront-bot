@@ -8,7 +8,7 @@ const openai = new OpenAI(config.OPENAI_API_KEY);
 export async function chatOpenAI(msg:ChatCompletionOptions["messages"], user:string){
     console.log('chat with ', user)
     const response = await openai.createChatCompletion({
-        model: "gpt-3.5-turbo",
+        model: "gpt-4",
         messages: msg,
     })
     try {
