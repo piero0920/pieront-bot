@@ -100,7 +100,7 @@ async function randomMsg(c: Channel, ircmsg: IrcMessage){
     }
 
     const response = await chatOpenAI(local_config.randomMsg, "random")
-    console.log(response)
+
     if(!response.success) return
     if(!response.msg) return
     c.send(response.msg.content)
