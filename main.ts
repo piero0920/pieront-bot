@@ -1,12 +1,14 @@
 import { validate_settings, local_config } from 'app/src/config.ts'
 import { load_bot, load_channel_settings } from 'app/src/redis.ts'
 import { TMI_CLIENT, listenChannel } from 'app/src/tmi.ts'
-
+import { runCronjobs } from 'app/src/cronjobs.ts'
 
 validate_settings()
 
 await load_bot()
 await load_channel_settings()
+
+runCronjobs()
 
 try {
     await TMI_CLIENT.connect();

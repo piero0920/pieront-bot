@@ -9,7 +9,7 @@ const redis = await RedisConnect({
     password: CONFIG.REDIS_PWD
 })
 
-function parseRedis(json: unknown , parse?: boolean){
+export function parseRedis(json: unknown , parse?: boolean){
     if(parse){
         return JSON.parse(json as string)
     }
@@ -17,7 +17,7 @@ function parseRedis(json: unknown , parse?: boolean){
 }
 
 const BOT_PREFIX = "BOT:BOT"
-const CHANNEL_PREFIX = "BOT:CHANNEL:"
+export const CHANNEL_PREFIX = "BOT:CHANNEL:"
 
 export async function getBot(){
     const bot = await redis.get(BOT_PREFIX)
