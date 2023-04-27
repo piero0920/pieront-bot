@@ -1,10 +1,9 @@
 {
-  "apps": [
-    {
-      "name": "bot",
-      "script": "./pieront-linux",
-      "time": true
-    }
-  ]
+    "apps": [
+        {
+            "name": "bot",
+            "script": "./pieront-linux",
+            "time": true
+        }
+    ]
 }
-  

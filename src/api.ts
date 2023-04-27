@@ -1,21 +1,15 @@
-import config from 'app/src/config.ts'
-import { 
-    accessToken, twitchApiError, botDatabase, TwitchUserResponse, 
-    TwitchVideoResponse, TwitchStreamResponse, TwitchEmoteResponse,
-    bttvEmoteResponse, ztvEmote, validateToken, videoPlaybackAccessToken,
-    auddResponse, traceMoe } from 'interfaces'
-import db, { saveToDB } from 'app/src/database.ts'
 import { datetime, fs, path } from 'deps'
+import { CONFIG } from 'app/src/config.ts'
+import { saveBot, getBot } from 'app/src/redis.ts'
 
+const DECODER = new TextDecoder()
 const MEDIA_PATH = "media"
 await fs.ensureDir(MEDIA_PATH)
 
-const DECODER = new TextDecoder()
-
 export async function get_auth_token(){
     const url = new URL('https://id.twitch.tv/oauth2/token')
-    url.searchParams.append("client_id", config.TWITCH_CLIENT)
-    url.searchParams.append("client_secret", config.TWITCH_SECRET)
+    url.searchParams.append("client_id", CONFIG.TWITCH_CLIENT)
+    url.searchParams.append("client_secret", CONFIG.TWITCH_SECRET)
     url.searchParams.append("grant_type", "client_credentials")
 
     const response = await fetch(url, { method: "POST"})
@@ -28,36 +22,16 @@ export async function get_auth_token(){
     }
 }
 
-export async function validate_auth_token(){
-    const bot = db.bot_db.get('bot')
-    const url = new URL('https://id.twitch.tv/oauth2/validate')
-
-    const r = await fetch(url, {
-        headers: {
-            "Authorization": "OAuth " + bot.access_token
-        }
-    })
-    
-    if(r.ok){
-        const response:validateToken = await r.json()
-        return response
-    }else {
-        const error: twitchApiError = await r.json()
-        console.log(error.message)
-        return undefined
-    }
-}
-
 export async function update_bot_auth_token(bot: botDatabase){
     const token = await get_auth_token()
     const token_expires_date = datetime().add({second: token.expires_in}).toMilliseconds()
     bot.access_token = token.access_token
     bot.expires_in_date = token_expires_date
-    await saveToDB(db.bot_db, 'bot', bot)
+    await saveBot(bot)
 }
 
 export async function refresh_auth_token(by_time?: boolean, by_status?: number) {
-    const bot = db.bot_db.get("bot")
+    const bot = await getBot()
     if(by_time){
         const token_date = datetime(bot.expires_in_date)
         const one_hour_ago = datetime().subtract({hour: 1})
@@ -65,7 +39,7 @@ export async function refresh_auth_token(by_time?: boolean, by_status?: number) 
             await update_bot_auth_token(bot)
         }
         return
-    }else if(by_status === 401){
+    }else if(by_status === 401 || by_status === 429){
         await update_bot_auth_token(bot)
         return
     }else {
@@ -74,30 +48,27 @@ export async function refresh_auth_token(by_time?: boolean, by_status?: number) 
     }
 }
 
-
-
 async function doubleFetch(url: URL){
     let responseFetch;
     let response
     for(let i = 1; i <= 2; i++){
-        const bot = db.bot_db.get("bot")
+        const bot = await getBot()
         responseFetch = await fetch(url, {
             headers: {
-                'Client-ID'     : config.TWITCH_CLIENT,
+                'Client-ID'     : CONFIG.TWITCH_CLIENT,
                 'Authorization' : `Bearer ${bot.access_token}`
             }
         })
         if(responseFetch.ok){
             response = await responseFetch.json()
             break
-        }else if(responseFetch.status === 401){
+        }else if(responseFetch.status === 401 || responseFetch.status === 429){
             await refresh_auth_token(false, responseFetch.status)
             continue
         }else {
             const error: twitchApiError = await responseFetch.json()
             throw error.message
         }
-        
     }
     return response
 }
@@ -168,7 +139,7 @@ export async function get_bttv_emotes(channel_id: string) {
     const url = new URL('https://api.betterttv.net/3/cached/users/twitch/'+channel_id)
 
     const emotesFetch = await fetch(url)
-    const emotes:bttvEmoteResponse = await emotesFetch.json()
+    const emotes: bttvEmoteResponse = await emotesFetch.json()
 
     if(emotes.sharedEmotes){
         return emotes.sharedEmotes
@@ -212,7 +183,7 @@ export async function BuildStreamURL(channel:string){
         method: "POST",
         headers: {
             "Client-ID": "kimne78kx3ncx6brgo4mv6wki5h1ko",
-            "Authorization": `OAuth ${config.TWITCH_OAUTH}`,
+            "Authorization": `OAuth ${CONFIG.TWITCH_OAUTH}`,
             'Content-Type': 'application/json',
         },
         body: BodyQuery
@@ -239,7 +210,7 @@ export async function getSongData(channel: string){
     const formData = new FormData();
     const fileData = await Deno.readFile(path.join(MEDIA_PATH,`${channel}.mp3`));
     
-    formData.append("api_token", config.AUUD_API_TOKEN);
+    formData.append("api_token", CONFIG.AUUD_API_TOKEN);
     formData.append("file", new Blob([fileData]), `${channel}.mp3`);
     
     const response = await fetch("https://api.audd.io/", { method: "POST", body: formData });

@@ -1,55 +1,55 @@
 import { TwitchChat, Channel } from 'deps'
-import config from 'app/src/config.ts'
-import db from 'app/src/database.ts'
-import { pong, last_vod, chat_with_bot, random_emote, tellMeThatAnime, tellMeThatSong, randomMsg } from 'app/src/replies.ts'
+import { CONFIG } from 'app/src/config.ts'
+import replies from 'app/src/replies.ts'
 
-const client = new TwitchChat(config.TWITCH_BOT_TOKEN, config.TWITCH_BOT_USERNAME)
+const TMI_CLIENT = new TwitchChat(CONFIG.TWITCH_BOT_TOKEN, CONFIG.TWITCH_BOT_USERNAME)
 
 function capitalize(str: string){
     return str[0].toUpperCase() + str.slice(1)
 }
+function getRandom(max = 100){
+    return Math.floor(Math.random() * max)
+}
 
-const bot_regex = new RegExp(`^@${capitalize(config.TWITCH_BOT_USERNAME)} `)
-const mod_regex = new RegExp(` ${config.TWITCH_BOT_MOD.split('_')[0]} `)
+const bot_regex = new RegExp(`^@${capitalize(CONFIG.TWITCH_BOT_USERNAME)} `)
+const mod_regex = new RegExp(` ${CONFIG.TWITCH_BOT_MOD.split('_')[0]} `)
 
 export async function listenChannel(c: Channel) {
     console.log('Listing tmi for', c.channelName)
     for await (const ircmsg of c) {
-        const channel_db = db.channel_db.get(c.channelName)
-        if(!channel_db){
-            console.log('Error getting channel Database')
-            return
-        }
         
-        const random1 = Math.floor(Math.random() * 100);
-        const random2 = Math.floor(Math.random() * 100); 
+        const random1 = getRandom()
+        const random2 = getRandom()
         
         switch (ircmsg.command) {
             case "PRIVMSG":
                 if(ircmsg.message == '!ping'){
-                    pong(c, ircmsg)
+                    replies.pong(c, ircmsg)
                 }
                 if(ircmsg.message == '!vod'){
-                    last_vod(c, ircmsg, channel_db)
+                    replies.last_vod(c, ircmsg)
                 }
                 if(bot_regex.test(ircmsg.message)){
-                    await chat_with_bot(c,ircmsg,channel_db)
+                    await replies.chat_with_bot(c, ircmsg)
                 }
                 if(random1 % random2 === 0 || ircmsg.message == '!a' || mod_regex.test(ircmsg.message)){
-                    random_emote(c, channel_db)
+                    await replies.random_emote(c)
                 }
                 if(ircmsg.message == '!aa' || ircmsg.username){
-                    await randomMsg(c, ircmsg, channel_db)
+                    await replies.randomMsg(c, ircmsg)
                 }
                 if(ircmsg.message == '!!anime'){
-                    await tellMeThatAnime(c, ircmsg, channel_db)
+                    await replies.tellMeThatAnime(c, ircmsg)
                 }
+                
                 // Testing
-                if(ircmsg.message == '!!song' && ircmsg.username == config.TWITCH_BOT_MOD){
-                    await tellMeThatSong(c, ircmsg, channel_db)
+                if(ircmsg.message == '!!song' && ircmsg.username == CONFIG.TWITCH_BOT_MOD){
+                    await replies.tellMeThatSong(c, ircmsg)
                 }
         }
     }
 }
 
-export default client
+export {
+    TMI_CLIENT
+}
