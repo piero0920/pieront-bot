@@ -7,8 +7,8 @@
         "start": "deno run --allow-read --allow-write --allow-net --allow-env --allow-run main.ts",
         "dev": "deno run --allow-all --watch main.ts",
         "test": "deno run --allow-all --watch test.ts",
-        "compile_windows": "deno compile --config deno.json tsconfig.json --allow-read --allow-write --allow-net --allow-env --allow-run --target x86_64-pc-windows-msvc -o pieront-windows.exe main.ts",
-        "compile_linux": "deno compile --config deno.json tsconfig.json --allow-read --allow-write --allow-net --allow-env --allow-run --target x86_64-unknown-linux-gnu -o pieront-linux main.ts",
+        "compile_windows": "deno compile --no-check --allow-read --allow-write --allow-net --allow-env --allow-run --target x86_64-pc-windows-msvc -o pieront-windows.exe main.ts",
+        "compile_linux": "deno compile --no-check --allow-read --allow-write --allow-net --allow-env --allow-run --target x86_64-unknown-linux-gnu -o pieront-linux main.ts",
         "pm2_linux": "pm2 start ecosystem.config.json",
         "setup_linux": "deno task compile_linux && deno task pm2_linux"
     }
