@@ -46,8 +46,6 @@ export async function validate_auth_token(){
         console.log(error.message)
         return undefined
     }
-
-    
 }
 
 export async function update_bot_auth_token(bot: botDatabase){
